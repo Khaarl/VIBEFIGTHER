@@ -1,3 +1,4 @@
+
 import arcade
 from .. import constants as C
 from ..character import Character
@@ -86,7 +87,7 @@ class GameView(arcade.View):
     def on_show_view(self):
         """ Called when switching to this view"""
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
-        arcade.set_viewport(0, C.SCREEN_WIDTH - 1, 0, C.SCREEN_HEIGHT - 1)
+        self.window.viewport = (0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT)
         # Potentially call setup() here if you want a fresh game every time
         # self.setup()
 
@@ -111,15 +112,17 @@ class GameView(arcade.View):
             health_width_p1 = C.HEALTHBAR_WIDTH * (self.player1_sprite.hp / self.player1_sprite.max_hp)
             if health_width_p1 < 0: health_width_p1 = 0
             # Background
-            arcade.draw_rectangle_filled(center_x=C.HEALTHBAR_PLAYER1_X + C.HEALTHBAR_WIDTH / 2,
-                                         center_y=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y,
-                                         width=C.HEALTHBAR_WIDTH, height=C.HEALTHBAR_HEIGHT,
-                                         color=C.HEALTH_BACKGROUND_COLOR)
+            arcade.draw_lrbt_rectangle_filled(left=C.HEALTHBAR_PLAYER1_X,
+                                              right=C.HEALTHBAR_PLAYER1_X + C.HEALTHBAR_WIDTH,
+                                              top=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y + C.HEALTHBAR_HEIGHT/2,
+                                              bottom=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - C.HEALTHBAR_HEIGHT/2,
+                                              color=C.HEALTH_BACKGROUND_COLOR)
             # Health
-            arcade.draw_rectangle_filled(center_x=C.HEALTHBAR_PLAYER1_X + health_width_p1 / 2,
-                                         center_y=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y,
-                                         width=health_width_p1, height=C.HEALTHBAR_HEIGHT,
-                                         color=C.HEALTH_COLOR)
+            arcade.draw_lrbt_rectangle_filled(left=C.HEALTHBAR_PLAYER1_X,
+                                              right=C.HEALTHBAR_PLAYER1_X + health_width_p1,
+                                              top=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y + C.HEALTHBAR_HEIGHT/2,
+                                              bottom=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - C.HEALTHBAR_HEIGHT/2,
+                                              color=C.HEALTH_COLOR)
             # Player 1 Text
             arcade.draw_text("Player 1", C.HEALTHBAR_PLAYER1_X, C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 25, 
                              arcade.color.WHITE, C.UI_FONT_SIZE)
@@ -128,15 +131,17 @@ class GameView(arcade.View):
             health_width_p2 = C.HEALTHBAR_WIDTH * (self.player2_sprite.hp / self.player2_sprite.max_hp)
             if health_width_p2 < 0: health_width_p2 = 0
             # Background
-            arcade.draw_rectangle_filled(center_x=C.HEALTHBAR_PLAYER2_X + C.HEALTHBAR_WIDTH / 2,
-                                         center_y=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y,
-                                         width=C.HEALTHBAR_WIDTH, height=C.HEALTHBAR_HEIGHT,
-                                         color=C.HEALTH_BACKGROUND_COLOR)
+            arcade.draw_lrbt_rectangle_filled(left=C.HEALTHBAR_PLAYER2_X,
+                                              right=C.HEALTHBAR_PLAYER2_X + C.HEALTHBAR_WIDTH,
+                                              top=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y + C.HEALTHBAR_HEIGHT/2,
+                                              bottom=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - C.HEALTHBAR_HEIGHT/2,
+                                              color=C.HEALTH_BACKGROUND_COLOR)
             # Health
-            arcade.draw_rectangle_filled(center_x=C.HEALTHBAR_PLAYER2_X + health_width_p2 / 2,
-                                         center_y=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y,
-                                         width=health_width_p2, height=C.HEALTHBAR_HEIGHT,
-                                         color=C.HEALTH_COLOR)
+            arcade.draw_lrbt_rectangle_filled(left=C.HEALTHBAR_PLAYER2_X,
+                                              right=C.HEALTHBAR_PLAYER2_X + health_width_p2,
+                                              top=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y + C.HEALTHBAR_HEIGHT/2,
+                                              bottom=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - C.HEALTHBAR_HEIGHT/2,
+                                              color=C.HEALTH_COLOR)
             # Player 2 Text
             arcade.draw_text("Player 2", C.HEALTHBAR_PLAYER2_X, C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 25, 
                              arcade.color.WHITE, C.UI_FONT_SIZE)
@@ -284,9 +289,12 @@ class GameView(arcade.View):
 
             # Create a temporary rect for collision check
             # Note: Using a sprite might be better for visualization/debugging
-            attack_hitbox = arcade.Rect(hitbox_center_x - hitbox_width / 2, 
-                                        hitbox_center_y - hitbox_height / 2, 
-                                        hitbox_width, hitbox_height)
+            attack_hitbox = arcade.shape_list.create_rectangle(
+                center_x=hitbox_center_x,
+                center_y=hitbox_center_y,
+                width=hitbox_width,
+                height=hitbox_height
+            )
 
             # Check collision with Player 2's boundaries
             if attack_hitbox.right > self.player2_sprite.left and \
@@ -315,9 +323,12 @@ class GameView(arcade.View):
                 hitbox_center_x = self.player2_sprite.center_x - hitbox_offset_x
             hitbox_center_y = self.player2_sprite.center_y
 
-            attack_hitbox = arcade.Rect(hitbox_center_x - hitbox_width / 2, 
-                                        hitbox_center_y - hitbox_height / 2, 
-                                        hitbox_width, hitbox_height)
+            attack_hitbox = arcade.shape_list.create_rectangle(
+                center_x=hitbox_center_x,
+                center_y=hitbox_center_y,
+                width=hitbox_width,
+                height=hitbox_height
+            )
 
             if attack_hitbox.right > self.player1_sprite.left and \
                attack_hitbox.left < self.player1_sprite.right and \

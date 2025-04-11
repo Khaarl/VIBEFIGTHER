@@ -9,7 +9,7 @@ class StartView(arcade.View):
         arcade.set_background_color(arcade.csscolor.DARK_SLATE_BLUE)
         # Reset the viewport, necessary if we have a scrolling game and we need
         # to reset the viewport back to the start so we can see what we draw.
-        arcade.set_viewport(0, C.SCREEN_WIDTH - 1, 0, C.SCREEN_HEIGHT - 1)
+        self.window.viewport = (0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT)
 
     def on_draw(self):
         """ Draw this view """

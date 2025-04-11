@@ -10,7 +10,7 @@ class GameOverView(arcade.View):
         self.winner = winner # Store who won
 
         # Reset the viewport, necessary if scaling was used in the game view
-        arcade.set_viewport(0, C.SCREEN_WIDTH - 1, 0, C.SCREEN_HEIGHT - 1)
+        self.window.viewport = (0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT)
 
     def on_show_view(self):
         """ Called when switching to this view"""

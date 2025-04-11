@@ -48,6 +48,11 @@ STATE_ATTACKING = "attacking"
 STATE_HIT = "hit"
 STATE_DEAD = "dead"
 
+# --- Character Directions ---
+RIGHT_FACING = 0
+LEFT_FACING = 1
+
+
 # --- Input Keys (Example Mapping) ---
 # Player 1
 KEY_UP_P1 = arcade.key.W
