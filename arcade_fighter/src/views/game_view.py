@@ -275,7 +275,7 @@ class GameView(arcade.View):
             return
 
         # Check Player 1 attacking Player 2
-        if self.player1_sprite.state == C.STATE_ATTACKING:
+        if self.player1_sprite.state == C.STATE_ATTACKING and self.player1_sprite.state_timer > (self.player1_sprite.attack_duration - 0.1):
             # Simple hitbox in front of the player
             hitbox_width = 60
             hitbox_height = self.player1_sprite.height
@@ -289,18 +289,11 @@ class GameView(arcade.View):
 
             # Create a temporary rect for collision check
             # Note: Using a sprite might be better for visualization/debugging
-            attack_hitbox = arcade.shape_list.create_rectangle(
-                center_x=hitbox_center_x,
-                center_y=hitbox_center_y,
-                width=hitbox_width,
-                height=hitbox_height
-            )
-
-            # Check collision with Player 2's boundaries
-            if attack_hitbox.right > self.player2_sprite.left and \
-               attack_hitbox.left < self.player2_sprite.right and \
-               attack_hitbox.bottom < self.player2_sprite.top and \
-               attack_hitbox.top > self.player2_sprite.bottom:
+            attack_hitbox = arcade.SpriteSolidColor(hitbox_width, hitbox_height, (0, 0, 0, 0)) # Transparent hitbox
+            attack_hitbox.center_x = hitbox_center_x
+            attack_hitbox.center_y = hitbox_center_y
+            
+            if arcade.check_for_collision(attack_hitbox, self.player2_sprite):
                 # Hit detected!
                 # Prevent multiple hits per single attack animation/state
                 # We can check if the attack timer is near its start
@@ -312,7 +305,7 @@ class GameView(arcade.View):
 
 
         # Check Player 2 attacking Player 1 (similar logic)
-        if self.player2_sprite.state == C.STATE_ATTACKING:
+        if self.player2_sprite.state == C.STATE_ATTACKING and self.player2_sprite.state_timer > (self.player2_sprite.attack_duration - 0.1):
             hitbox_width = 60
             hitbox_height = self.player2_sprite.height
             hitbox_offset_x = 40
@@ -323,17 +316,11 @@ class GameView(arcade.View):
                 hitbox_center_x = self.player2_sprite.center_x - hitbox_offset_x
             hitbox_center_y = self.player2_sprite.center_y
 
-            attack_hitbox = arcade.shape_list.create_rectangle(
-                center_x=hitbox_center_x,
-                center_y=hitbox_center_y,
-                width=hitbox_width,
-                height=hitbox_height
-            )
-
-            if attack_hitbox.right > self.player1_sprite.left and \
-               attack_hitbox.left < self.player1_sprite.right and \
-               attack_hitbox.bottom < self.player1_sprite.top and \
-               attack_hitbox.top > self.player1_sprite.bottom:
+            attack_hitbox = arcade.SpriteSolidColor(hitbox_width, hitbox_height, (0, 0, 0, 0)) # Transparent hitbox
+            attack_hitbox.center_x = hitbox_center_x
+            attack_hitbox.center_y = hitbox_center_y
+            
+            if arcade.check_for_collision(attack_hitbox, self.player1_sprite) and not self.player2_sprite.has_hit:
                 if self.player2_sprite.state_timer > (self.player2_sprite.attack_duration - 0.1):
                      print(f"HIT! Player 2 attacks Player 1")
                      self.player1_sprite.take_damage(self.player2_sprite.attack_damage)

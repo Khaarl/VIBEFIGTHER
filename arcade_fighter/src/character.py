@@ -18,7 +18,6 @@ STATE_DEAD = "dead"
 
 class Character(arcade.Sprite):
     """ Base Character class for players """
-
     def __init__(self, player_num: int, scale: float = 1):
         super().__init__(scale=scale)
 
@@ -47,6 +46,7 @@ class Character(arcade.Sprite):
         self.is_on_ground = False # Will be updated by physics engine checks
 
         # --- Combat ---
+        self.has_hit = False # Tracks if attack has already hit
         self.attack_cooldown = 0.0
         self.attack_duration = 0.5 # How long attack state lasts
         self.attack_damage = 10
@@ -132,6 +132,7 @@ class Character(arcade.Sprite):
         """ Initiate an attack """
         if self.attack_cooldown <= 0 and self.state not in [STATE_ATTACKING, STATE_HIT, STATE_DEAD]:
             print(f"Player {self.player_num} ATTACK!") # Debug
+            self.has_hit = False # Reset hit flag for new attack
             self.state = STATE_ATTACKING
             self.attack_cooldown = 1.0 # Example: 1 second cooldown
             self.state_timer = self.attack_duration # Attack state lasts for this duration
