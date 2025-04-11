@@ -159,7 +159,12 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time):
         """ Movement and game logic """
-                # Update physics (Phase 5)
+                # Update physics and ground state
+        # Update player ground state
+        if self.player1_sprite:
+            self.player1_sprite.is_on_ground = self.physics_engine_p1.can_jump()
+        if self.player2_sprite:
+            self.player2_sprite.is_on_ground = self.physics_engine_p2.can_jump()
         if self.physics_engine_p1:
             self.physics_engine_p1.update()
         if self.physics_engine_p2:
@@ -218,7 +223,7 @@ class GameView(arcade.View):
         """Called when a key is pressed. """
         # --- Player 1 Controls ---
         if self.player1_sprite:
-            if key == C.KEY_JUMP_P1:
+            if key == C.KEY_JUMP_P1 and self.physics_engine_p1.can_jump():
                 # TODO: Check physics engine can_jump() here later
                 self.player1_sprite.jump()
             elif key == C.KEY_LEFT_P1:
@@ -233,7 +238,7 @@ class GameView(arcade.View):
 
         # --- Player 2 Controls ---
         if self.player2_sprite:
-            if key == C.KEY_JUMP_P2:
+            if key == C.KEY_JUMP_P2 and self.physics_engine_p2.can_jump():
                 # TODO: Check physics engine can_jump() here later
                 self.player2_sprite.jump()
             elif key == C.KEY_LEFT_P2:
