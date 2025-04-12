@@ -42,6 +42,12 @@ MUSIC_FILES = [
     "arcade_fighter/assets/MUSIC/22 - DavidKBD - Purgatory Pack - MiniLoop 14.ogg"
 ]
 
+BACKGROUND_IMAGES = [
+    "arcade_fighter/assets/images/STATIC/khaaaarl_black_grey_white_noise_textur_--v_5.2_abf518d5-1518-4fec-937f-dc4a1811b272_0.png",
+    "arcade_fighter/assets/images/STATIC/khaaaarl_giant_bat_spread_wings_screaming_sonic_wawwes_by_jun_b5f9261a-da76-43a2-b967-78bbf0a0dd63_1.png",
+    "arcade_fighter/assets/images/STATIC/khaaaarl_giant_bat_spread_wings_screaming_sonic_wawwes_by_jun_33df75ef-efbc-4a90-8a6f-8a656c8f9431_3.png"
+]
+
 # Fullscreen state
 FULLSCREEN = False
 

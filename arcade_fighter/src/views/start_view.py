@@ -213,88 +213,44 @@ class StartView(arcade.View):
             self.music_player.play()
 
     def setup_background(self):
-        """ Setup dynamic background elements """
-        # Particle system
+        """ Setup static background image """
+        self.background_sprites = arcade.SpriteList()
+        import random
+        bg_image = random.choice(C.BACKGROUND_IMAGES)
+        self.background = arcade.Sprite(
+            bg_image,
+            center_x=C.SCREEN_WIDTH/2,
+            center_y=C.SCREEN_HEIGHT/2,
+            image_width=C.SCREEN_WIDTH,
+            image_height=C.SCREEN_HEIGHT
+        )
+        self.background_sprites.append(self.background)
+        
+        # Keep particle effects for visual interest
         self.particles = arcade.SpriteList()
-        for _ in range(100):
+        for _ in range(50):
             particle = arcade.SpriteCircle(
-                radius=random.randint(1, 3),
-                color=random.choice([
-                    arcade.color.WHITE,
-                    arcade.color.LIGHT_BLUE,
-                    arcade.color.LIGHT_STEEL_BLUE
-                ])
+                radius=random.randint(1, 2),
+                color=arcade.color.WHITE
             )
             particle.position = (
                 random.randint(0, C.SCREEN_WIDTH),
                 random.randint(0, C.SCREEN_HEIGHT)
             )
-            particle.change_x = random.uniform(-0.2, 0.2)
-            particle.change_y = random.uniform(-0.1, 0.1)
+            particle.change_x = random.uniform(-0.1, 0.1)
+            particle.change_y = random.uniform(-0.05, 0.05)
+            particle.alpha = 100
             self.particles.append(particle)
-            
-        # Parallax layers
-        self.parallax_layers = []
-        for i in range(3):
-            layer = arcade.SpriteList()
-            for _ in range(20):
-                sprite = arcade.SpriteSolidColor(
-                    width=(i+1)*2, 
-                    height=(i+1)*2,
-                    color=arcade.color.GRAY if i == 0 else 
-                          arcade.color.DARK_GRAY if i == 1 else
-                          arcade.color.DARK_SLATE_GRAY
-                )
-                sprite.position = (
-                    random.randint(0, C.SCREEN_WIDTH),
-                    random.randint(0, C.SCREEN_HEIGHT)
-                )
-                layer.append(sprite)
-            self.parallax_layers.append(layer)
-            
-        # Interactive elements
-        self.interactive_sprites = arcade.SpriteList()
-        for _ in range(5):
-            sprite = arcade.SpriteCircle(
-                radius=10,
-                color=arcade.color.GOLD
-            )
-            sprite.position = (
-                random.randint(50, C.SCREEN_WIDTH-50),
-                random.randint(50, C.SCREEN_HEIGHT-50)
-            )
-            self.interactive_sprites.append(sprite)
 
     def on_draw(self):
         """ Draw this view """
         self.clear()
         
         # Draw background
-        if not hasattr(self, 'background_sprites'):
-            self.background_sprites = arcade.SpriteList()
-            background = arcade.Sprite(
-                ":resources:images/backgrounds/stars.png",
-                center_x=C.SCREEN_WIDTH/2,
-                center_y=C.SCREEN_HEIGHT/2,
-                image_width=C.SCREEN_WIDTH,
-                image_height=C.SCREEN_HEIGHT
-            )
-            self.background_sprites.append(background)
         self.background_sprites.draw()
         
-        # Draw effects
-        for layer in self.parallax_layers:
-            layer.draw()
+        # Draw particles
         self.particles.draw()
-        
-        # Draw interactive elements
-        for sprite in self.interactive_sprites:
-            arcade.draw_circle_filled(
-                sprite.center_x, sprite.center_y,
-                sprite.width * 1.5,
-                (255, 215, 0, 50)
-            )
-        self.interactive_sprites.draw()
         
         # Draw UI
         self.title_text.draw()
@@ -450,21 +406,10 @@ class StartView(arcade.View):
                 particle.center_y = C.SCREEN_HEIGHT
             elif particle.center_y > C.SCREEN_HEIGHT:
                 particle.center_y = 0
-                
-        # Animate parallax layers
-        for i, layer in enumerate(self.parallax_layers):
-            for sprite in layer:
-                sprite.center_x -= (i+1) * 0.1
-                if sprite.center_x < -10:
-                    sprite.center_x = C.SCREEN_WIDTH + 10
     
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
-        """ Make interactive elements respond to mouse """
-        for sprite in self.interactive_sprites:
-            dist = math.sqrt((x - sprite.center_x)**2 + (y - sprite.center_y)**2)
-            if dist < 100:
-                sprite.center_x += dx * 0.3
-                sprite.center_y += dy * 0.3
+        """ Handle mouse movement """
+        pass  # No interactive elements to handle
                 
     def play_random_music(self):
         """Play a randomly selected music track"""
