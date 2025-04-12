@@ -34,19 +34,22 @@ class TextButton:
 
     def draw(self):
         """ Draw the button """
-        arcade.draw_rectangle_filled(
-            self.center_x, self.center_y, self.width,
-            self.height, self.face_color)
+        arcade.draw_lrbt_rectangle_filled(
+            self.center_x - self.width/2, self.center_x + self.width/2,
+            self.center_y - self.height/2, self.center_y + self.height/2,
+            self.face_color)
 
         if not self.pressed:
-            arcade.draw_rectangle_filled(
-                self.center_x, self.center_y + self.button_height/2,
-                self.width, self.button_height, self.shadow_color)
+            arcade.draw_lrbt_rectangle_filled(
+                self.center_x - self.width/2, self.center_x + self.width/2,
+                self.center_y, self.center_y + self.button_height,
+                self.shadow_color)
 
-        arcade.draw_text(
+        text = arcade.Text(
             self.text, self.center_x, self.center_y,
             self.font_color, self.font_size,
             align="center", anchor_x="center", anchor_y="center")
+        text.draw()
 
     def on_press(self):
         self.pressed = True
@@ -73,7 +76,99 @@ class TextButton:
         return False
 
 class StartView(arcade.View):
-    """ View to show before the game starts with enhanced background """
+    """ Enhanced main menu view with multiple menu states """
+    
+    def __init__(self):
+        super().__init__()
+        self.menu_state = C.MENU_MAIN
+        self.buttons = []
+        self.setup_menus()
+        
+    def setup_menus(self):
+        """ Create buttons for all menu states """
+        # Main Menu
+        self.main_menu_buttons = [
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 50,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "New Game",
+                font_size=24
+            ),
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "Options",
+                font_size=24
+            ),
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "Exit",
+                font_size=24
+            )
+        ]
+        
+        # Options Menu
+        self.options_menu_buttons = [
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 100,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "Video",
+                font_size=24
+            ),
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 50,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "Audio",
+                font_size=24
+            ),
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "Music",
+                font_size=24
+            ),
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "Back",
+                font_size=24
+            )
+        ]
+        
+        # Video Settings Menu
+        self.video_menu_buttons = [
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 150,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "SD (800x600)",
+                font_size=24
+            ),
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 100,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "HD (1280x720)",
+                font_size=24
+            ),
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 50,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "FHD (1920x1080)",
+                font_size=24
+            ),
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "Fullscreen: ON" if C.FULLSCREEN else "Fullscreen: OFF",
+                font_size=24
+            ),
+            TextButton(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
+                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                "Back",
+                font_size=24
+            )
+        ]
 
     def setup_background(self):
         """ Setup dynamic background elements """
@@ -131,7 +226,8 @@ class StartView(arcade.View):
     def on_show_view(self):
         """ This is run once when we switch to this view """
         self.setup_background()
-        self.window.viewport = (0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT)
+        self.window.set_fullscreen(C.FULLSCREEN)
+        self.menu_state = C.MENU_MAIN
 
     def on_draw(self):
         """ Draw this view """
@@ -166,16 +262,86 @@ class StartView(arcade.View):
             )
         self.interactive_sprites.draw()
         
-        # Draw menu text with shadow for better visibility
-        arcade.draw_text("ARCADE FIGHTER", C.SCREEN_WIDTH / 2 + 2, C.SCREEN_HEIGHT / 2 + 48,
-                         arcade.color.BLACK, font_size=50, anchor_x="center")
-        arcade.draw_text("ARCADE FIGHTER", C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2 + 50,
-                         arcade.color.WHITE, font_size=50, anchor_x="center")
+        # Draw title
+        title = arcade.Text("ARCADE FIGHTER", C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT - 100,
+                         C.WHITE, font_size=50, anchor_x="center")
+        title.draw()
         
-        arcade.draw_text("Press ENTER to Start", C.SCREEN_WIDTH / 2 + 1, C.SCREEN_HEIGHT / 2 - 51,
-                         arcade.color.BLACK, font_size=20, anchor_x="center")
-        arcade.draw_text("Press ENTER to Start", C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2 - 50,
-                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        # Draw current menu buttons
+        if self.menu_state == C.MENU_MAIN:
+            for button in self.main_menu_buttons:
+                button.draw()
+        elif self.menu_state == C.MENU_OPTIONS:
+            for button in self.options_menu_buttons:
+                button.draw()
+        elif self.menu_state == C.MENU_VIDEO:
+            for button in self.video_menu_buttons:
+                button.draw()
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        """ Handle mouse clicks """
+        if self.menu_state == C.MENU_MAIN:
+            for btn in self.main_menu_buttons:
+                if btn.check_mouse_press(x, y):
+                    if btn.text == "New Game":
+                        self.start_game()
+                    elif btn.text == "Options":
+                        self.menu_state = C.MENU_OPTIONS
+                    elif btn.text == "Exit":
+                        arcade.exit()
+        
+        elif self.menu_state == C.MENU_OPTIONS:
+            for btn in self.options_menu_buttons:
+                if btn.check_mouse_press(x, y):
+                    if btn.text == "Video":
+                        self.menu_state = C.MENU_VIDEO
+                    elif btn.text == "Back":
+                        self.menu_state = C.MENU_MAIN
+        
+        elif self.menu_state == C.MENU_VIDEO:
+            for btn in self.video_menu_buttons:
+                if btn.check_mouse_press(x, y):
+                    if btn.text.startswith("SD"):
+                        self.set_resolution("SD")
+                    elif btn.text.startswith("HD"):
+                        self.set_resolution("HD")
+                    elif btn.text.startswith("FHD"):
+                        self.set_resolution("FHD")
+                    elif btn.text.startswith("Fullscreen"):
+                        self.toggle_fullscreen()
+                    elif btn.text == "Back":
+                        self.menu_state = C.MENU_OPTIONS
+
+    def toggle_fullscreen(self):
+        """ Toggle fullscreen mode """
+        C.FULLSCREEN = not C.FULLSCREEN
+        self.window.set_fullscreen(C.FULLSCREEN)
+        
+        # Update fullscreen button text
+        for button in self.video_menu_buttons:
+            if button.text.startswith("Fullscreen"):
+                button.text = "Fullscreen: ON" if C.FULLSCREEN else "Fullscreen: OFF"
+                break
+
+    def set_resolution(self, res_key):
+        """ Change screen resolution """
+        width, height = C.RESOLUTIONS[res_key]
+        self.window.set_size(width, height)
+        # Update button positions for new resolution
+        self.setup_menus()
+
+    def start_game(self):
+        """ Start the game """
+        print("Starting GameView...")
+        try:
+            from .game_view import GameView
+            game_view = GameView()
+            game_view.setup()
+            self.window.show_view(game_view)
+        except NameError:
+            print("GameView not yet defined/imported properly.")
+        except AttributeError:
+            print("GameView might exist but missing setup() method.")
 
     def on_update(self, delta_time: float):
         """ Animate background elements """
@@ -207,17 +373,3 @@ class StartView(arcade.View):
             if dist < 100:
                 sprite.center_x += dx * 0.3
                 sprite.center_y += dy * 0.3
-
-    def on_key_press(self, key, modifiers):
-        """ If the user presses the Enter key, start the game. """
-        if key == arcade.key.ENTER:
-            print("Starting GameView...")
-            try:
-                from .game_view import GameView
-                game_view = GameView()
-                game_view.setup()
-                self.window.show_view(game_view)
-            except NameError:
-                 print("GameView not yet defined/imported properly.")
-            except AttributeError:
-                 print("GameView might exist but missing setup() method.")
