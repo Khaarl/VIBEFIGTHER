@@ -368,19 +368,23 @@ class StartView(arcade.View):
                 break
 
     def set_resolution(self, res_key):
-        """ Change screen resolution """
+        """ Change screen resolution and update all dependent values """
         was_fullscreen = C.FULLSCREEN
         if was_fullscreen:
             self.window.set_fullscreen(False)
             
-        width, height = C.RESOLUTIONS[res_key]
-        self.window.set_size(width, height)
+        # Update resolution constants
+        C.set_resolution(res_key)
+        
+        # Apply window size changes
+        self.window.set_size(C.SCREEN_WIDTH, C.SCREEN_HEIGHT)
         
         if was_fullscreen:
             self.window.set_fullscreen(True)
             
-        # Update button positions for new resolution
+        # Update all UI elements
         self.setup_menus()
+        self.setup_background()
 
     def show_game_mode_selection(self):
         """Show game mode selection buttons"""

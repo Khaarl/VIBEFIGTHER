@@ -52,7 +52,17 @@ class Character(arcade.Sprite):
         # Reset current texture
         self.texture = self.idle_texture_pair[self.facing_direction]
         
-    def __init__(self, player_num: int, scale: float = 1):
+    def __init__(self, player_num: int, scale: float = None):
+        """Initialize character with optional scale.
+        If scale is None, will calculate based on resolution."""
+        if scale is None:
+            # Base scale on resolution - smaller screens get larger characters
+            if C.SCREEN_WIDTH <= 800:  # SD
+                scale = 1.2
+            elif C.SCREEN_WIDTH <= 1280:  # HD
+                scale = 1.0
+            else:  # FHD+
+                scale = 0.8
         super().__init__(scale=scale)
 
         # --- Player Identity ---

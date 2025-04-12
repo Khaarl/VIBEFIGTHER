@@ -119,9 +119,23 @@ class GameView(arcade.View):
     def on_show_view(self):
         """ Called when switching to this view"""
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
-        self.window.viewport = (0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT)
+        self.update_viewport()
         # Potentially call setup() here if you want a fresh game every time
         # self.setup()
+
+    def on_resize(self, width: int, height: int):
+        """Handle window resize events"""
+        super().on_resize(width, height)
+        self.update_viewport()
+        
+    def update_viewport(self):
+        """Update viewport and UI positions based on current resolution"""
+        self.window.viewport = (0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT)
+        # Update any resolution-dependent positions
+        if hasattr(self, 'player1_sprite') and self.player1_sprite:
+            self.player1_sprite.center_x = C.SCREEN_WIDTH * 0.25
+        if hasattr(self, 'player2_sprite') and self.player2_sprite:
+            self.player2_sprite.center_x = C.SCREEN_WIDTH * 0.75
 
     def debug_draw(self):
         """Draw debug overlays"""

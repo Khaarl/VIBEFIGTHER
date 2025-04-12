@@ -7,13 +7,22 @@ SCREEN_TITLE = "Arcade Fighter"
 # Resolution Options
 RESOLUTIONS = {
     "SD": (800, 600),
-    "HD": (1280, 720), 
+    "HD": (1280, 720),
     "FHD": (1920, 1080)
 }
 
-# Default resolution
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 650
+# Current resolution tracking
+_CURRENT_RESOLUTION = "HD"  # Default to HD
+SCREEN_WIDTH, SCREEN_HEIGHT = RESOLUTIONS[_CURRENT_RESOLUTION]
+
+def set_resolution(res_key: str):
+    """Set the current resolution and update constants"""
+    global SCREEN_WIDTH, SCREEN_HEIGHT, _CURRENT_RESOLUTION
+    if res_key in RESOLUTIONS:
+        _CURRENT_RESOLUTION = res_key
+        SCREEN_WIDTH, SCREEN_HEIGHT = RESOLUTIONS[res_key]
+        # Update dependent constants
+        HEALTHBAR_PLAYER2_X = SCREEN_WIDTH - 50 - HEALTHBAR_WIDTH
 
 # Menu States
 MENU_MAIN = "main"
