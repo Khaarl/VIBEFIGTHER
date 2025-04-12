@@ -30,16 +30,40 @@ class Character(arcade.Sprite):
 
         # --- State and Animation ---
         self.state = STATE_IDLE
-        self.facing_direction = RIGHT_FACING # Default direction
-        # TODO: Load textures here (idle, walk, jump, attack etc.)
-        # Example: self.idle_texture_pair = arcade.load_texture_pair(f"path/to/idle.png")
-        #          self.walk_textures = [...]
-        # Use a simple colored box as a placeholder for now
-        self.texture = arcade.make_soft_square_texture(50, C.RED if player_num == 1 else C.BLUE, center_alpha=255)
-        # Placeholder size - adjust as needed
-        self.width = self.texture.width * scale
-        self.height = self.texture.height * scale
-
+        self.facing_direction = RIGHT_FACING
+        
+        # Load Evil Wizard 2 textures
+        base_path = "assets/CHAR-ANIM/PLAYERS/EVil Wizard 2/Sprites/"
+        
+        # Idle animation
+        self.idle_texture_pair = arcade.load_texture_pair(f"{base_path}Idle.png")
+        
+        # Walk animation
+        self.walk_textures = []
+        self.walk_textures.append(arcade.load_texture_pair(f"{base_path}Run.png"))
+        
+        # Jump animation
+        self.jump_texture_pair = arcade.load_texture_pair(f"{base_path}Jump.png")
+        
+        # Fall animation
+        self.fall_texture_pair = arcade.load_texture_pair(f"{base_path}Fall.png")
+        
+        # Attack animations
+        self.attack_textures = []
+        self.attack_textures.append(arcade.load_texture_pair(f"{base_path}Attack1.png"))
+        self.attack_textures.append(arcade.load_texture_pair(f"{base_path}Attack2.png"))
+        
+        # Hit animation
+        self.hit_texture_pair = arcade.load_texture_pair(f"{base_path}Take hit.png")
+        
+        # Death animation
+        self.death_texture_pair = arcade.load_texture_pair(f"{base_path}Death.png")
+        
+        # Set initial texture
+        self.texture = self.idle_texture_pair[self.facing_direction]
+        
+        # Set hit box (adjust as needed)
+        self.hit_box = self.texture.hit_box_points
 
         # --- Physics / Movement ---
         # self.change_x and self.change_y are inherited from Sprite
@@ -63,25 +87,30 @@ class Character(arcade.Sprite):
         Logic for selecting the proper texture to use.
         Also flips textures based on facing direction.
         """
-        # --- Texture flipping based on facing direction ---
+        # Flip texture if direction changed
         if self.change_x < 0 and self.facing_direction == RIGHT_FACING:
             self.facing_direction = LEFT_FACING
         elif self.change_x > 0 and self.facing_direction == LEFT_FACING:
             self.facing_direction = RIGHT_FACING
 
-        # TODO: Add animation logic here based on self.state
-        # Example:
-        # if self.state == STATE_WALKING:
-        #     self.texture = self.walk_textures[self.current_texture_index]
-        # elif self.state == STATE_IDLE:
-        #     self.texture = self.idle_texture_pair[self.facing_direction]
-        # ... etc ...
-
-        # For now, just ensure the placeholder texture is set
-        # (It's set in __init__, so this might not be needed yet)
-        # self.texture = self.texture # No real animation yet
-
-        pass # Placeholder
+        # Update texture based on state
+        if self.state == STATE_IDLE:
+            self.texture = self.idle_texture_pair[self.facing_direction]
+        elif self.state == STATE_WALKING:
+            self.texture = self.walk_textures[0][self.facing_direction]
+        elif self.state == STATE_JUMPING:
+            self.texture = self.jump_texture_pair[self.facing_direction]
+        elif self.state == STATE_FALLING:
+            self.texture = self.fall_texture_pair[self.facing_direction]
+        elif self.state == STATE_ATTACKING:
+            # Cycle through attack textures
+            attack_frame = int(self.state_timer / self.attack_duration * len(self.attack_textures))
+            attack_frame = min(attack_frame, len(self.attack_textures) - 1)
+            self.texture = self.attack_textures[attack_frame][self.facing_direction]
+        elif self.state == STATE_HIT:
+            self.texture = self.hit_texture_pair[self.facing_direction]
+        elif self.state == STATE_DEAD:
+            self.texture = self.death_texture_pair[self.facing_direction]
 
     def on_update(self, delta_time: float = 1/60):
         """ Called by the arcade engine to update sprite state """

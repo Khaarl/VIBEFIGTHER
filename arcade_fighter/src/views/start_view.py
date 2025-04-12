@@ -351,15 +351,10 @@ class StartView(arcade.View):
     def start_game(self):
         """ Start the game """
         print("Starting GameView...")
-        try:
-            from .game_view import GameView
-            game_view = GameView()
-            game_view.setup()
-            self.window.show_view(game_view)
-        except NameError:
-            print("GameView not yet defined/imported properly.")
-        except AttributeError:
-            print("GameView might exist but missing setup() method.")
+        from src.views.game_view import GameView
+        game_view = GameView()
+        self.window.show_view(game_view)
+        game_view.setup()
 
     def on_update(self, delta_time: float):
         """ Animate background elements """
