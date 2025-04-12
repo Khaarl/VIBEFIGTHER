@@ -1,4 +1,5 @@
 import arcade
+import os
 
 # Screen Constants
 SCREEN_TITLE = "Arcade Fighter"
@@ -90,10 +91,11 @@ KEY_JUMP_P2 = arcade.key.ENTER
 KEY_ATTACK_P2 = arcade.key.RCTRL
 
 # Debug Settings
-DEBUG_MODE = False
-DEBUG_SHOW_HITBOXES = True
-DEBUG_SHOW_VECTORS = True
-DEBUG_SHOW_ANIM_STATES = True
+# Debug settings - default to False in production
+DEBUG_MODE = os.getenv('ARCADE_DEBUG', 'False').lower() in ('true', '1', 't')
+DEBUG_SHOW_HITBOXES = DEBUG_MODE
+DEBUG_SHOW_VECTORS = DEBUG_MODE
+DEBUG_SHOW_ANIM_STATES = DEBUG_MODE
 
 # Debug Controls
 KEY_TOGGLE_DEBUG = arcade.key.F1

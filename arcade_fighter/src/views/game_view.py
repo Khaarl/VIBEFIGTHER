@@ -72,9 +72,10 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
         self.platform_list = arcade.SpriteList(use_spatial_hash=True) # Spatial hash for static platforms
 
-        # --- Background Setup --- (Phase 2)
-        # TODO: Load background texture here
-        # self.background = arcade.load_texture("path/to/your/background.png")
+        # --- Background Setup ---
+        self.background = arcade.load_texture(
+            "arcade_fighter/assets/LEVELS/Glacial-mountains/background_glacial_mountains.png"
+        )
 
                 # --- Player Setup --- (Phase 3)
         # Player 1
@@ -187,10 +188,8 @@ class GameView(arcade.View):
             self.debug_draw()
 
         # Draw game elements
-        # TODO: Draw background image here (Phase 2)
-        # Draw background texture (Phase 2)
-        # if self.background:
-        #     arcade.draw_lrwh_rectangle_textured(0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT, self.background)
+        if hasattr(self, 'background'):
+            arcade.draw_lrwh_rectangle_textured(0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT, self.background)
 
         self.platform_list.draw()
         self.player_list.draw()
@@ -240,9 +239,6 @@ class GameView(arcade.View):
         arcade.draw_text(f"Round: {self.round_number}", C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 10,
                          arcade.color.WHITE, C.UI_FONT_SIZE, anchor_x="center")
         # TODO: Add round win indicators later
-
-        # Example placeholder text
-        arcade.draw_text(f"Round: {self.round_number}", 10, C.SCREEN_HEIGHT - 30, arcade.color.WHITE, 18)
         arcade.draw_text("Game View - Placeholder", C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2,
                          arcade.color.WHITE, font_size=30, anchor_x="center")
 
@@ -309,17 +305,6 @@ class GameView(arcade.View):
         # - Handle boundary checks (Phase 5)
         # - Handle AI if applicable (Phase 9)
 
-    def on_key_release(self, key, modifiers):
-        """Called when a key is released. """
-        # Player 1
-        if self.player1_sprite:
-            if key in (C.KEY_LEFT_P1, C.KEY_RIGHT_P1):
-                self.player1_sprite.stop_moving()
-        
-        # Player 2
-        if self.player2_sprite:
-            if key in (C.KEY_LEFT_P2, C.KEY_RIGHT_P2):
-                self.player2_sprite.stop_moving()
                 
     def reload_assets(self):
         """Hot-reload character assets"""
@@ -415,11 +400,15 @@ class GameView(arcade.View):
                 hitbox_center_x = self.player1_sprite.center_x - hitbox_offset_x
             hitbox_center_y = self.player1_sprite.center_y
 
-            # Create a temporary rect for collision check
-            # Note: Using a sprite might be better for visualization/debugging
-            attack_hitbox = arcade.SpriteSolidColor(hitbox_width, hitbox_height, (0, 0, 0, 0)) # Transparent hitbox
-            attack_hitbox.center_x = hitbox_center_x
-            attack_hitbox.center_y = hitbox_center_y
+            # Use pre-created hitbox if available, otherwise create
+            if not hasattr(self, '_attack_hitbox'):
+                self._attack_hitbox = arcade.SpriteSolidColor(60, 100, (0, 0, 0, 0))
+            
+            self._attack_hitbox.width = hitbox_width
+            self._attack_hitbox.height = hitbox_height
+            self._attack_hitbox.center_x = hitbox_center_x
+            self._attack_hitbox.center_y = hitbox_center_y
+            attack_hitbox = self._attack_hitbox
             
             if arcade.check_for_collision(attack_hitbox, self.player2_sprite):
                 # Hit detected!

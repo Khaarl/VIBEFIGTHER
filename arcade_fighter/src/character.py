@@ -12,38 +12,42 @@ def load_texture_pair(file_path: str) -> Tuple[arcade.Texture, arcade.Texture]:
     return texture, flipped_texture
 from . import constants as C
 
-# Constants for facing direction
-RIGHT_FACING = 0
-LEFT_FACING = 1
+# Import states from constants
+from .constants import (
+    RIGHT_FACING,
+    LEFT_FACING,
+    STATE_IDLE,
+    STATE_WALKING,
+    STATE_JUMPING,
+    STATE_ATTACKING,
+    STATE_HIT,
+    STATE_DEAD
+)
 
-# --- Player states ---
-# (Duplicated from constants for now, might refactor later)
-STATE_IDLE = "idle"
-STATE_WALKING = "walking"
-STATE_JUMPING = "jumping"
-STATE_FALLING = "falling" # Added state
-STATE_ATTACKING = "attacking"
-STATE_HIT = "hit"
-STATE_DEAD = "dead"
+STATE_FALLING = "falling" # New state not in constants
 
 
 class Character(arcade.Sprite):
     """ Base Character class for players """
     def reload_textures(self):
         """Reload all character textures"""
-        base_path = "arcade_fighter/assets/CHAR-ANIM/PLAYERS/EVil Wizard 2/Sprites/"
-        
-        # Reload all textures
-        self.idle_texture_pair = load_texture_pair(f"{base_path}Idle.png")
-        self.walk_textures = [load_texture_pair(f"{base_path}Run.png")]
-        self.jump_texture_pair = load_texture_pair(f"{base_path}Jump.png")
-        self.fall_texture_pair = load_texture_pair(f"{base_path}Fall.png")
-        self.attack_textures = [
-            load_texture_pair(f"{base_path}Attack1.png"),
-            load_texture_pair(f"{base_path}Attack2.png")
-        ]
-        self.hit_texture_pair = load_texture_pair(f"{base_path}Take hit.png")
-        self.death_texture_pair = load_texture_pair(f"{base_path}Death.png")
+        # Cache textures if not already loaded
+        if not hasattr(self, '_textures_loaded'):
+            base_path = "arcade_fighter/assets/CHAR-ANIM/PLAYERS/EVil Wizard 2/Sprites/"
+            
+            # Load all textures
+            self.idle_texture_pair = load_texture_pair(f"{base_path}Idle.png")
+            self.walk_textures = [load_texture_pair(f"{base_path}Run.png")]
+            self.jump_texture_pair = load_texture_pair(f"{base_path}Jump.png")
+            self.fall_texture_pair = load_texture_pair(f"{base_path}Fall.png")
+            self.attack_textures = [
+                load_texture_pair(f"{base_path}Attack1.png"),
+                load_texture_pair(f"{base_path}Attack2.png")
+            ]
+            self.hit_texture_pair = load_texture_pair(f"{base_path}Take hit.png")
+            self.death_texture_pair = load_texture_pair(f"{base_path}Death.png")
+            
+            self._textures_loaded = True
         
         # Reset current texture
         self.texture = self.idle_texture_pair[self.facing_direction]
@@ -104,13 +108,19 @@ class Character(arcade.Sprite):
         self.attack_cooldown = 0.0
         self.attack_duration = 0.5 # How long attack state lasts
         self.attack_damage = 10
-        # TODO: Define hitbox shape/offset relative to sprite center
-        self.attack_hitbox = None # Will be a temporary sprite or rect during attack
+        # Attack hitbox definition (width, height, offset_x, offset_y)
+        self.attack_hitbox = {
+            'width': 60,
+            'height': 100,
+            'offset_x': 40,
+            'offset_y': 0
+        }
 
         # --- Timers ---
         self.state_timer = 0.0 # Generic timer for states like 'hit' or 'attacking'
 
-        print(f"Character {player_num} created.") # Debug print
+        if C.DEBUG_MODE:
+            print(f"Character {player_num} created.")
 
     def update_animation(self, delta_time: float = 1/60):
         """
@@ -155,16 +165,19 @@ class Character(arcade.Sprite):
                 if self.state == STATE_HIT or self.state == STATE_ATTACKING:
                     self.state = STATE_IDLE # Or STATE_FALLING if in air
 
-        # TODO: Add state logic updates here
-        # - Transition between states (e.g., jumping -> falling)
-        # - Handle state-specific behavior
+        # State transition logic
+        if not self.is_on_ground and self.state not in (STATE_JUMPING, STATE_FALLING, STATE_ATTACKING, STATE_HIT, STATE_DEAD):
+            self.state = STATE_FALLING
+        elif self.is_on_ground and self.state == STATE_FALLING and self.change_y == 0:
+            self.state = STATE_IDLE
 
         # Check if dead
         if self.hp <= 0 and self.state != STATE_DEAD:
             self.state = STATE_DEAD
             self.change_x = 0
             # Maybe change texture to a "defeated" pose
-            print(f"Player {self.player_num} is DEAD")
+            if C.DEBUG_MODE:
+                print(f"Player {self.player_num} is DEAD")
 
     def move(self, direction: int):
         """ Set horizontal movement speed based on direction (-1 left, 1 right) """
@@ -185,12 +198,14 @@ class Character(arcade.Sprite):
              self.change_y = C.PLAYER_JUMP_SPEED
              self.state = STATE_JUMPING
              self.is_on_ground = False # Assume we left the ground
-             print(f"Player {self.player_num} JUMP!") # Debug
+             if C.DEBUG_MODE:
+                 print(f"Player {self.player_num} JUMP!")
 
     def attack(self):
         """ Initiate an attack """
         if self.attack_cooldown <= 0 and self.state not in [STATE_ATTACKING, STATE_HIT, STATE_DEAD]:
-            print(f"Player {self.player_num} ATTACK!") # Debug
+            if C.DEBUG_MODE:
+                print(f"Player {self.player_num} ATTACK!")
             self.has_hit = False # Reset hit flag for new attack
             self.state = STATE_ATTACKING
             self.attack_cooldown = 1.0 # Example: 1 second cooldown
@@ -203,7 +218,8 @@ class Character(arcade.Sprite):
         """ Take damage, update health, and change state """
         if self.state != STATE_DEAD: # Can't take damage if already dead
             self.hp -= amount
-            print(f"Player {self.player_num} takes {amount} damage. HP: {self.hp}/{self.max_hp}") # Debug
+            if C.DEBUG_MODE:
+                print(f"Player {self.player_num} takes {amount} damage. HP: {self.hp}/{self.max_hp}")
             if self.hp <= 0:
                 self.hp = 0
                 self.state = STATE_DEAD
