@@ -174,6 +174,27 @@ class StartView(arcade.View):
             )
         ]
 
+    def create_debug_button(self):
+        """Create debug mode toggle button"""
+        debug_button = arcade.gui.UIFlatButton(
+            text="Debug Mode: OFF" if not C.DEBUG_MODE else "Debug Mode: ON",
+            width=200,
+            height=40,
+            style={
+                "font_size": 14,
+                "font_color": arcade.color.WHITE,
+                "bg_color": arcade.color.RED if C.DEBUG_MODE else arcade.color.DARK_GREEN
+            }
+        )
+        debug_button.on_click = self.on_click_debug
+        return debug_button
+        
+    def on_click_debug(self, event):
+        """Toggle debug mode"""
+        C.DEBUG_MODE = not C.DEBUG_MODE
+        self.manager.clear()
+        self.setup()
+        
     def on_show_view(self):
         """ Called when switching to this view """
         self.setup_background()
@@ -277,6 +298,9 @@ class StartView(arcade.View):
         elif self.menu_state == C.MENU_VIDEO:
             for button in self.video_menu_buttons:
                 button.draw()
+        elif self.menu_state == "mode_select":
+            for button in self.mode_select_buttons:
+                button.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
         """ Handle mouse clicks """
@@ -284,11 +308,21 @@ class StartView(arcade.View):
             for btn in self.main_menu_buttons:
                 if btn.check_mouse_press(x, y):
                     if btn.text == "New Game":
-                        self.start_game()
+                        self.show_game_mode_selection()
                     elif btn.text == "Options":
                         self.menu_state = C.MENU_OPTIONS
                     elif btn.text == "Exit":
                         arcade.exit()
+        
+        elif self.menu_state == "mode_select":
+            for btn in self.mode_select_buttons:
+                if btn.check_mouse_press(x, y):
+                    if btn.text == "Standard Mode":
+                        self.start_game(debug_mode=False)
+                    elif btn.text == "Debug Mode":
+                        self.start_game(debug_mode=True)
+                    elif btn.text == "Back":
+                        self.menu_state = C.MENU_MAIN
         
         elif self.menu_state == C.MENU_OPTIONS:
             for btn in self.options_menu_buttons:
@@ -348,9 +382,39 @@ class StartView(arcade.View):
         # Update button positions for new resolution
         self.setup_menus()
 
-    def start_game(self):
+    def show_game_mode_selection(self):
+        """Show game mode selection buttons"""
+        self.menu_state = "mode_select"
+        
+        # Create mode selection buttons if they don't exist
+        if not hasattr(self, 'mode_select_buttons'):
+            self.mode_select_buttons = [
+                TextButton(
+                    C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 50,
+                    C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                    "Standard Mode",
+                    font_size=24,
+                    face_color=arcade.color.DARK_GREEN
+                ),
+                TextButton(
+                    C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2,
+                    C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                    "Debug Mode",
+                    font_size=24,
+                    face_color=arcade.color.DARK_RED
+                ),
+                TextButton(
+                    C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
+                    C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
+                    "Back",
+                    font_size=24
+                )
+            ]
+    
+    def start_game(self, debug_mode=False):
         """ Start the game """
         print("Starting GameView...")
+        C.DEBUG_MODE = debug_mode
         from src.views.game_view import GameView
         game_view = GameView()
         self.window.show_view(game_view)

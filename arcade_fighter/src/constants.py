@@ -88,3 +88,16 @@ KEY_LEFT_P2 = arcade.key.LEFT
 KEY_RIGHT_P2 = arcade.key.RIGHT
 KEY_JUMP_P2 = arcade.key.UP
 KEY_ATTACK_P2 = arcade.key.ENTER
+
+# Debug Settings
+DEBUG_MODE = False
+DEBUG_SHOW_HITBOXES = True
+DEBUG_SHOW_VECTORS = True
+DEBUG_SHOW_ANIM_STATES = True
+
+# Debug Controls
+KEY_TOGGLE_DEBUG = arcade.key.F1
+KEY_RELOAD_ASSETS = arcade.key.F5
+KEY_TOGGLE_HITBOXES = arcade.key.F2
+KEY_TOGGLE_VECTORS = arcade.key.F3
+KEY_TOGGLE_ANIM_DEBUG = arcade.key.F4

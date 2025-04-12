@@ -34,6 +34,37 @@ class GameView(arcade.View):
         # Set background color
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
+    def debug_setup(self):
+        """Simplified setup for debug mode"""
+        # Clear existing sprites
+        self.player_list.clear()
+        self.platform_list.clear()
+        
+        # Create test platform
+        platform = arcade.SpriteSolidColor(
+            int(C.SCREEN_WIDTH * 1.5), 64, 
+            arcade.color.GRAY
+        )
+        platform.center_x = C.SCREEN_WIDTH / 2
+        platform.center_y = 32
+        self.platform_list.append(platform)
+        
+        # Create only Player 1
+        self.player1_sprite = Character(
+            player_num=1, 
+            scale=C.CHARACTER_SCALING
+        )
+        self.player1_sprite.center_x = C.SCREEN_WIDTH / 2
+        self.player1_sprite.bottom = 64
+        self.player_list.append(self.player1_sprite)
+        
+        # Simplified physics
+        self.physics_engine_p1 = arcade.PhysicsEnginePlatformer(
+            self.player1_sprite, 
+            self.platform_list, 
+            gravity_constant=C.GRAVITY
+        )
+        
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
         print("Setting up GameView...") # Debug print
@@ -91,10 +122,69 @@ class GameView(arcade.View):
         # Potentially call setup() here if you want a fresh game every time
         # self.setup()
 
+    def debug_draw(self):
+        """Draw debug overlays"""
+        if C.DEBUG_SHOW_HITBOXES:
+            for player in self.player_list:
+                arcade.draw_polygon_outline(
+                    player.hit_box.get_adjusted_points(),
+                    arcade.color.RED,
+                    2
+                )
+                
+        if C.DEBUG_SHOW_VECTORS and self.player1_sprite:
+            # Draw velocity vector
+            arcade.draw_line(
+                self.player1_sprite.center_x,
+                self.player1_sprite.center_y,
+                self.player1_sprite.center_x + self.player1_sprite.change_x * 10,
+                self.player1_sprite.center_y + self.player1_sprite.change_y * 10,
+                arcade.color.BLUE,
+                2
+            )
+            
+        if C.DEBUG_SHOW_ANIM_STATES and self.player1_sprite:
+            arcade.draw_text(
+                f"State: {self.player1_sprite.state}",
+                self.player1_sprite.left,
+                self.player1_sprite.top + 20,
+                arcade.color.WHITE,
+                12
+            )
+            
+    def draw_debug_hud(self):
+        """Draw debug information overlay"""
+        if not C.DEBUG_MODE:
+            return
+            
+        # Debug controls info
+        debug_text = [
+            "DEBUG MODE ACTIVATED",
+            "F1: Toggle Debug",
+            "F2: Toggle Hitboxes",
+            "F3: Toggle Vectors",
+            "F4: Toggle Anim States",
+            "F5: Reload Assets"
+        ]
+        
+        for i, text in enumerate(debug_text):
+            arcade.draw_text(
+                text,
+                10, C.SCREEN_HEIGHT - 30 - (i * 20),
+                arcade.color.RED if i == 0 else arcade.color.WHITE,
+                12
+            )
+            
     def on_draw(self):
         """ Render the screen. """
         # Clear the screen
         self.clear()
+        
+        # Draw debug HUD
+        self.draw_debug_hud()
+        
+        if C.DEBUG_MODE:
+            self.debug_draw()
 
         # Draw game elements
         # TODO: Draw background image here (Phase 2)
@@ -219,8 +309,41 @@ class GameView(arcade.View):
         # - Handle boundary checks (Phase 5)
         # - Handle AI if applicable (Phase 9)
 
+    def on_key_release(self, key, modifiers):
+        """Called when a key is released. """
+        # Player 1
+        if self.player1_sprite:
+            if key in (C.KEY_LEFT_P1, C.KEY_RIGHT_P1):
+                self.player1_sprite.stop_moving()
+        
+        # Player 2
+        if self.player2_sprite:
+            if key in (C.KEY_LEFT_P2, C.KEY_RIGHT_P2):
+                self.player2_sprite.stop_moving()
+                
+    def reload_assets(self):
+        """Hot-reload character assets"""
+        if self.player1_sprite:
+            self.player1_sprite.reload_textures()
+            print("Assets reloaded")
+            
     def on_key_press(self, key, modifiers):
         """Called when a key is pressed. """
+        # Debug controls
+        if C.DEBUG_MODE:
+            if key == arcade.key.F1:
+                C.DEBUG_MODE = not C.DEBUG_MODE
+            elif key == arcade.key.F2:
+                C.DEBUG_SHOW_HITBOXES = not C.DEBUG_SHOW_HITBOXES
+            elif key == arcade.key.F3:
+                C.DEBUG_SHOW_VECTORS = not C.DEBUG_SHOW_VECTORS
+            elif key == arcade.key.F4:
+                C.DEBUG_SHOW_ANIM_STATES = not C.DEBUG_SHOW_ANIM_STATES
+            elif key == arcade.key.F5:
+                self.reload_assets()
+                return
+        
+        # Original controls
         # --- Player 1 Controls ---
         if self.player1_sprite:
             if key == C.KEY_JUMP_P1 and self.physics_engine_p1.can_jump():

@@ -1,4 +1,15 @@
 import arcade
+from arcade import hitbox
+from typing import Tuple
+
+def load_texture_pair(file_path: str) -> Tuple[arcade.Texture, arcade.Texture]:
+    """
+    Load a texture pair, with the second being a mirror image.
+    Replaces the removed arcade.load_texture_pair() function.
+    """
+    texture = arcade.load_texture(file_path)
+    flipped_texture = texture.flip_horizontally()
+    return texture, flipped_texture
 from . import constants as C
 
 # Constants for facing direction
@@ -18,6 +29,25 @@ STATE_DEAD = "dead"
 
 class Character(arcade.Sprite):
     """ Base Character class for players """
+    def reload_textures(self):
+        """Reload all character textures"""
+        base_path = "arcade_fighter/assets/CHAR-ANIM/PLAYERS/EVil Wizard 2/Sprites/"
+        
+        # Reload all textures
+        self.idle_texture_pair = load_texture_pair(f"{base_path}Idle.png")
+        self.walk_textures = [load_texture_pair(f"{base_path}Run.png")]
+        self.jump_texture_pair = load_texture_pair(f"{base_path}Jump.png")
+        self.fall_texture_pair = load_texture_pair(f"{base_path}Fall.png")
+        self.attack_textures = [
+            load_texture_pair(f"{base_path}Attack1.png"),
+            load_texture_pair(f"{base_path}Attack2.png")
+        ]
+        self.hit_texture_pair = load_texture_pair(f"{base_path}Take hit.png")
+        self.death_texture_pair = load_texture_pair(f"{base_path}Death.png")
+        
+        # Reset current texture
+        self.texture = self.idle_texture_pair[self.facing_direction]
+        
     def __init__(self, player_num: int, scale: float = 1):
         super().__init__(scale=scale)
 
@@ -33,37 +63,37 @@ class Character(arcade.Sprite):
         self.facing_direction = RIGHT_FACING
         
         # Load Evil Wizard 2 textures
-        base_path = "assets/CHAR-ANIM/PLAYERS/EVil Wizard 2/Sprites/"
+        base_path = "arcade_fighter/assets/CHAR-ANIM/PLAYERS/EVil Wizard 2/Sprites/"
         
         # Idle animation
-        self.idle_texture_pair = arcade.load_texture_pair(f"{base_path}Idle.png")
+        self.idle_texture_pair = load_texture_pair(f"{base_path}Idle.png")
         
         # Walk animation
         self.walk_textures = []
-        self.walk_textures.append(arcade.load_texture_pair(f"{base_path}Run.png"))
+        self.walk_textures.append(load_texture_pair(f"{base_path}Run.png"))
         
         # Jump animation
-        self.jump_texture_pair = arcade.load_texture_pair(f"{base_path}Jump.png")
+        self.jump_texture_pair = load_texture_pair(f"{base_path}Jump.png")
         
         # Fall animation
-        self.fall_texture_pair = arcade.load_texture_pair(f"{base_path}Fall.png")
+        self.fall_texture_pair = load_texture_pair(f"{base_path}Fall.png")
         
         # Attack animations
         self.attack_textures = []
-        self.attack_textures.append(arcade.load_texture_pair(f"{base_path}Attack1.png"))
-        self.attack_textures.append(arcade.load_texture_pair(f"{base_path}Attack2.png"))
+        self.attack_textures.append(load_texture_pair(f"{base_path}Attack1.png"))
+        self.attack_textures.append(load_texture_pair(f"{base_path}Attack2.png"))
         
         # Hit animation
-        self.hit_texture_pair = arcade.load_texture_pair(f"{base_path}Take hit.png")
+        self.hit_texture_pair = load_texture_pair(f"{base_path}Take hit.png")
         
         # Death animation
-        self.death_texture_pair = arcade.load_texture_pair(f"{base_path}Death.png")
+        self.death_texture_pair = load_texture_pair(f"{base_path}Death.png")
         
         # Set initial texture
         self.texture = self.idle_texture_pair[self.facing_direction]
         
         # Set hit box (adjust as needed)
-        self.hit_box = self.texture.hit_box_points
+        self.hit_box = hitbox.HitBox(self.texture.hit_box_points)
 
         # --- Physics / Movement ---
         # self.change_x and self.change_y are inherited from Sprite
