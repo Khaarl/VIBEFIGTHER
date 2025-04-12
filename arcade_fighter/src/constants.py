@@ -78,16 +78,16 @@ KEY_UP_P1 = arcade.key.W
 KEY_DOWN_P1 = arcade.key.S
 KEY_LEFT_P1 = arcade.key.A
 KEY_RIGHT_P1 = arcade.key.D
-KEY_JUMP_P1 = arcade.key.W
-KEY_ATTACK_P1 = arcade.key.SPACE
+KEY_JUMP_P1 = arcade.key.SPACE
+KEY_ATTACK_P1 = arcade.key.F
 
 # Player 2
 KEY_UP_P2 = arcade.key.UP
 KEY_DOWN_P2 = arcade.key.DOWN
 KEY_LEFT_P2 = arcade.key.LEFT
 KEY_RIGHT_P2 = arcade.key.RIGHT
-KEY_JUMP_P2 = arcade.key.UP
-KEY_ATTACK_P2 = arcade.key.ENTER
+KEY_JUMP_P2 = arcade.key.ENTER
+KEY_ATTACK_P2 = arcade.key.RCTRL
 
 # Debug Settings
 DEBUG_MODE = False
