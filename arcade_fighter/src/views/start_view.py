@@ -85,10 +85,23 @@ class StartView(arcade.View):
         self.music_player = None
         self.current_volume = C.DEFAULT_VOLUME
         self.current_track = None
-        self.title_text = arcade.Text(
-            "ARCADE FIGHTER", C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT - 100,
-            C.WHITE, font_size=50, anchor_x="center"
+        self.flicker_timer = 0
+        self.symbol_alpha = 0
+        
+        # Load occult symbol texture
+        self.occult_symbol = arcade.load_texture(":resources:images/items/star.png")
+        
+        # Create title with custom font
+        self.title = arcade.Text(
+            "ARCADE FIGHTER",
+            C.SCREEN_WIDTH/2,
+            C.SCREEN_HEIGHT - 150,
+            C.BONE_WHITE,
+            C.FONT_SIZE_TITLE,
+            anchor_x="center",
+            font_name=C.FONT_PRIMARY
         )
+        
         self.setup_menus()
         
     def setup_menus(self):
@@ -226,12 +239,12 @@ class StartView(arcade.View):
         )
         self.background_sprites.append(self.background)
         
-        # Keep particle effects for visual interest
+        # Optimized particle effects
         self.particles = arcade.SpriteList()
-        for _ in range(50):
+        for _ in range(30):  # Reduced from 50 to 30
             particle = arcade.SpriteCircle(
-                radius=random.randint(1, 2),
-                color=arcade.color.WHITE
+                radius=1,  # Fixed size for consistency
+                color=(200, 200, 200, 150)  # Semi-transparent gray
             )
             particle.position = (
                 random.randint(0, C.SCREEN_WIDTH),
@@ -246,14 +259,53 @@ class StartView(arcade.View):
         """ Draw this view """
         self.clear()
         
-        # Draw background
+        # Dark background base
+        arcade.draw_lrbt_rectangle_filled(
+            0, C.SCREEN_WIDTH, 0, C.SCREEN_HEIGHT, C.OBSIDIAN
+        )
+        
+        # Draw background with dark overlay
         self.background_sprites.draw()
+        arcade.draw_lrbt_rectangle_filled(
+            0, C.SCREEN_WIDTH, 0, C.SCREEN_HEIGHT, (0, 0, 0, 180)
+        )
+        
+        # Draw occult symbol (fading in/out)
+        if self.symbol_alpha > 0:
+            # Initialize symbol and sprite list if not exists
+            if not hasattr(self, 'symbol'):
+                self.symbol = arcade.Sprite()
+                self.symbol.texture = self.occult_symbol
+                self.symbol_list = arcade.SpriteList()
+                self.symbol_list.append(self.symbol)
+            
+            # Update symbol properties
+            self.symbol.center_x = C.SCREEN_WIDTH/2
+            self.symbol.center_y = C.SCREEN_HEIGHT/2
+            self.symbol.width = C.SCREEN_WIDTH * C.OCCULT_SYMBOL_SCALE
+            self.symbol.height = C.SCREEN_WIDTH * C.OCCULT_SYMBOL_SCALE
+            self.symbol.alpha = min(255, max(0, int(self.symbol_alpha * 2.55)))
+            
+            # Draw symbol via sprite list
+            self.symbol_list.draw()
+            
+            # Add subtle vignette effect
+            arcade.draw_lrbt_rectangle_filled(
+                0, C.SCREEN_WIDTH, 0, C.SCREEN_HEIGHT,
+                (0, 0, 0, 30)
+            )
         
         # Draw particles
         self.particles.draw()
         
-        # Draw UI
-        self.title_text.draw()
+        # Draw title with flicker effect
+        flicker = random.randint(0, 20) if self.flicker_timer <= 0 else 0
+        self.title.color = (
+            max(100, C.BONE_WHITE[0] - flicker),
+            max(100, C.BONE_WHITE[1] - flicker),
+            max(100, C.BONE_WHITE[2] - flicker)
+        )
+        self.title.draw()
         
         # Draw current menu buttons
         if self.menu_state == C.MENU_MAIN:
@@ -396,16 +448,18 @@ class StartView(arcade.View):
         # Update particles
         self.particles.update()
         
-        # Wrap particles around screen edges
+        # Optimized edge wrapping
         for particle in self.particles:
-            if particle.center_x < 0:
-                particle.center_x = C.SCREEN_WIDTH
-            elif particle.center_x > C.SCREEN_WIDTH:
-                particle.center_x = 0
-            if particle.center_y < 0:
-                particle.center_y = C.SCREEN_HEIGHT
-            elif particle.center_y > C.SCREEN_HEIGHT:
-                particle.center_y = 0
+            particle.center_x %= C.SCREEN_WIDTH
+            particle.center_y %= C.SCREEN_HEIGHT
+                
+        # Update visual effects
+        self.flicker_timer -= delta_time
+        if self.flicker_timer <= 0:
+            self.flicker_timer = C.FLICKER_INTERVAL
+            
+        # Smoother symbol pulse animation
+        self.symbol_alpha = int(100 + 50 * math.sin(self.flicker_timer * 2))
     
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ Handle mouse movement """

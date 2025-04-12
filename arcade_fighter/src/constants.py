@@ -62,17 +62,27 @@ HEALTHBAR_PLAYER1_X = 50
 HEALTHBAR_PLAYER2_X = SCREEN_WIDTH - 50 - HEALTHBAR_WIDTH
 UI_FONT_SIZE = 18
 
+# UI Colors
+BLOOD_RED = (136, 8, 8)
+OBSIDIAN = (10, 10, 10)
+ASH_GRAY = (30, 30, 30)
+BONE_WHITE = (220, 220, 210)
+RUST = (180, 65, 21)
+
+# UI Elements
+BUTTON_BORDER = 3
+FLICKER_INTERVAL = 2.0  # seconds
+OCCULT_SYMBOL_SCALE = 0.15
+
+# Font Settings
+FONT_PRIMARY = ":resources:fonts/Blackmetal.ttf"
+FONT_SIZE_TITLE = 72
+FONT_SIZE_BUTTON = 28
+FONT_SIZE_SMALL = 18
+
 # Colors
 WHITE = arcade.color.WHITE
 BLACK = arcade.color.BLACK
-BLUE = arcade.color.BLUE
-LIGHT_BLUE = arcade.color.LIGHT_BLUE
-DARK_BLUE = arcade.color.DARK_BLUE_GRAY
-GOLD = arcade.color.GOLD
-RED = arcade.color.RED
-GREEN = arcade.color.GREEN
-HEALTH_COLOR = arcade.color.GREEN
-HEALTH_BACKGROUND_COLOR = arcade.color.DARK_RED
 
 # Physics Constants
 GRAVITY = 1.0
