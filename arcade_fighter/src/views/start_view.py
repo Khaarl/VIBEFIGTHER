@@ -6,19 +6,11 @@ from typing import Optional
 from .. import constants as C
 
 class TextButton:
-    """ Text-based button for menu """
-    def __init__(self,
-                 center_x: float,
-                 center_y: float,
-                 width: float,
-                 height: float,
-                 text: str,
-                 font_size: int = 18,
-                 font_color = arcade.color.WHITE,  # type: ignore[attr-defined]
-                 face_color = arcade.color.DARK_BLUE_GRAY,  # type: ignore[attr-defined]
-                 highlight_color = arcade.color.LIGHT_BLUE,  # type: ignore[attr-defined]
-                 shadow_color = arcade.color.BLACK,  # type: ignore[attr-defined]
-                 button_height: int = 2):
+    """ Complete text button implementation """
+    def __init__(self, center_x, center_y, width, height, text, font_size=18,
+                font_color=arcade.color.WHITE, face_color=arcade.color.DARK_BLUE_GRAY,
+                highlight_color=arcade.color.LIGHT_BLUE, shadow_color=arcade.color.BLACK,
+                button_height=2):
         self.center_x = center_x
         self.center_y = center_y
         self.width = width
@@ -31,6 +23,16 @@ class TextButton:
         self.shadow_color = shadow_color
         self.button_height = button_height
         self.pressed = False
+        self._text_obj = None
+        self.create_text()
+
+    def create_text(self):
+        """ Create cached text object """
+        self._text_obj = arcade.Text(
+            self.text, self.center_x, self.center_y,
+            self.font_color, self.font_size,
+            align="center", anchor_x="center", anchor_y="center"
+        )
 
     def draw(self):
         """ Draw the button """
@@ -45,11 +47,7 @@ class TextButton:
                 self.center_y, self.center_y + self.button_height,
                 self.shadow_color)
 
-        text = arcade.Text(
-            self.text, self.center_x, self.center_y,
-            self.font_color, self.font_size,
-            align="center", anchor_x="center", anchor_y="center")
-        text.draw()
+        self._text_obj.draw()
 
     def on_press(self):
         self.pressed = True
@@ -58,6 +56,7 @@ class TextButton:
         self.pressed = False
 
     def check_mouse_press(self, x, y):
+        """ Check if mouse click is within button bounds """
         if (x > self.center_x - self.width/2 and
             x < self.center_x + self.width/2 and
             y > self.center_y - self.height/2 and
@@ -67,6 +66,7 @@ class TextButton:
         return False
 
     def check_mouse_release(self, x, y):
+        """ Check if mouse release is within button bounds """
         if self.pressed:
             self.on_release()
             return (x > self.center_x - self.width/2 and
@@ -76,12 +76,16 @@ class TextButton:
         return False
 
 class StartView(arcade.View):
-    """ Enhanced main menu view with multiple menu states """
+    """ Optimized main menu view for FHD """
     
     def __init__(self):
         super().__init__()
         self.menu_state = C.MENU_MAIN
         self.buttons = []
+        self.title_text = arcade.Text(
+            "ARCADE FIGHTER", C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT - 100,
+            C.WHITE, font_size=50, anchor_x="center"
+        )
         self.setup_menus()
         
     def setup_menus(self):
@@ -170,9 +174,15 @@ class StartView(arcade.View):
             )
         ]
 
+    def on_show_view(self):
+        """ Called when switching to this view """
+        self.setup_background()
+        self.window.set_fullscreen(C.FULLSCREEN)
+        self.menu_state = C.MENU_MAIN
+
     def setup_background(self):
         """ Setup dynamic background elements """
-        # Particle system for animated stars
+        # Particle system
         self.particles = arcade.SpriteList()
         for _ in range(100):
             particle = arcade.SpriteCircle(
@@ -191,7 +201,7 @@ class StartView(arcade.View):
             particle.change_y = random.uniform(-0.1, 0.1)
             self.particles.append(particle)
             
-        # Parallax layers using sprites
+        # Parallax layers
         self.parallax_layers = []
         for i in range(3):
             layer = arcade.SpriteList()
@@ -223,17 +233,11 @@ class StartView(arcade.View):
             )
             self.interactive_sprites.append(sprite)
 
-    def on_show_view(self):
-        """ This is run once when we switch to this view """
-        self.setup_background()
-        self.window.set_fullscreen(C.FULLSCREEN)
-        self.menu_state = C.MENU_MAIN
-
     def on_draw(self):
         """ Draw this view """
         self.clear()
         
-        # Draw dark gradient background using sprite list
+        # Draw background
         if not hasattr(self, 'background_sprites'):
             self.background_sprites = arcade.SpriteList()
             background = arcade.Sprite(
@@ -246,26 +250,22 @@ class StartView(arcade.View):
             self.background_sprites.append(background)
         self.background_sprites.draw()
         
-        # Draw parallax layers
+        # Draw effects
         for layer in self.parallax_layers:
             layer.draw()
-            
-        # Draw particles through sprite list
         self.particles.draw()
         
-        # Draw interactive elements with glow effect
+        # Draw interactive elements
         for sprite in self.interactive_sprites:
             arcade.draw_circle_filled(
                 sprite.center_x, sprite.center_y,
                 sprite.width * 1.5,
-                (255, 215, 0, 50)  # Gold with transparency
+                (255, 215, 0, 50)
             )
         self.interactive_sprites.draw()
         
-        # Draw title
-        title = arcade.Text("ARCADE FIGHTER", C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT - 100,
-                         C.WHITE, font_size=50, anchor_x="center")
-        title.draw()
+        # Draw UI
+        self.title_text.draw()
         
         # Draw current menu buttons
         if self.menu_state == C.MENU_MAIN:
@@ -312,6 +312,16 @@ class StartView(arcade.View):
                     elif btn.text == "Back":
                         self.menu_state = C.MENU_OPTIONS
 
+    def on_key_press(self, key, modifiers):
+        """ Handle keyboard input """
+        if key == arcade.key.ENTER and self.menu_state == C.MENU_MAIN:
+            self.start_game()
+        elif key == arcade.key.ESCAPE:
+            if self.menu_state == C.MENU_OPTIONS:
+                self.menu_state = C.MENU_MAIN
+            elif self.menu_state == C.MENU_VIDEO:
+                self.menu_state = C.MENU_OPTIONS
+
     def toggle_fullscreen(self):
         """ Toggle fullscreen mode """
         C.FULLSCREEN = not C.FULLSCREEN
@@ -325,8 +335,16 @@ class StartView(arcade.View):
 
     def set_resolution(self, res_key):
         """ Change screen resolution """
+        was_fullscreen = C.FULLSCREEN
+        if was_fullscreen:
+            self.window.set_fullscreen(False)
+            
         width, height = C.RESOLUTIONS[res_key]
         self.window.set_size(width, height)
+        
+        if was_fullscreen:
+            self.window.set_fullscreen(True)
+            
         # Update button positions for new resolution
         self.setup_menus()
 
