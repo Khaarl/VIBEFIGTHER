@@ -31,6 +31,17 @@ MENU_VIDEO = "video"
 MENU_AUDIO = "audio"
 MENU_MUSIC = "music"
 
+# Audio Constants
+DEFAULT_VOLUME = 0.5
+MUSIC_FILES = [
+    "arcade_fighter/assets/MUSIC/09 - DavidKBD - Purgatory Pack - MiniLoop 01.ogg",
+    "arcade_fighter/assets/MUSIC/12 - DavidKBD - Purgatory Pack - MiniLoop 04.ogg",
+    "arcade_fighter/assets/MUSIC/13 - DavidKBD - Purgatory Pack - MiniLoop 05.ogg",
+    "arcade_fighter/assets/MUSIC/17 - DavidKBD - Purgatory Pack - MiniLoop 09.ogg",
+    "arcade_fighter/assets/MUSIC/21 - DavidKBD - Purgatory Pack - MiniLoop 13.ogg",
+    "arcade_fighter/assets/MUSIC/22 - DavidKBD - Purgatory Pack - MiniLoop 14.ogg"
+]
+
 # Fullscreen state
 FULLSCREEN = False
 

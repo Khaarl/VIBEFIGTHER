@@ -82,6 +82,9 @@ class StartView(arcade.View):
         super().__init__()
         self.menu_state = C.MENU_MAIN
         self.buttons = []
+        self.music_player = None
+        self.current_volume = C.DEFAULT_VOLUME
+        self.current_track = None
         self.title_text = arcade.Text(
             "ARCADE FIGHTER", C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT - 100,
             C.WHITE, font_size=50, anchor_x="center"
@@ -200,6 +203,14 @@ class StartView(arcade.View):
         self.setup_background()
         self.window.set_fullscreen(C.FULLSCREEN)
         self.menu_state = C.MENU_MAIN
+        
+        # Start random music if not already playing
+        if not self.music_player or not self.music_player.playing:
+            self.play_random_music()
+            
+        # Resume music if returning to view
+        elif self.music_player and not self.music_player.playing:
+            self.music_player.play()
 
     def setup_background(self):
         """ Setup dynamic background elements """
@@ -454,3 +465,25 @@ class StartView(arcade.View):
             if dist < 100:
                 sprite.center_x += dx * 0.3
                 sprite.center_y += dy * 0.3
+                
+    def play_random_music(self):
+        """Play a randomly selected music track"""
+        import random
+        if self.music_player:
+            self.music_player.stop()
+            
+        self.current_track = random.choice(C.MUSIC_FILES)
+        sound = arcade.load_sound(self.current_track)
+        self.music_player = sound.play(volume=self.current_volume)
+        self.music_player.loop = True
+        
+    def adjust_volume(self, change: float):
+        """Adjust volume by specified amount (clamped to 0-1)"""
+        self.current_volume = max(0, min(1, self.current_volume + change))
+        if self.music_player:
+            self.music_player.volume = self.current_volume
+            
+    def on_hide_view(self):
+        """Called when leaving this view"""
+        if self.music_player:
+            self.music_player.pause()

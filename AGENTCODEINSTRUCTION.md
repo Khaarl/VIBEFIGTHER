@@ -15,15 +15,7 @@ Before starting any planning or coding work, follow these verification steps:
   ```
 - The project requires arcade version 3.1.0 or higher
 
-## 3. Project Structure
-The main project directories are:
-- `arcade_fighter/` - Main game package
-  - `assets/` - Game assets (images, sounds, music)
-  - `src/` - Source code
-    - `views/` - Game view classes
-- `AGENTCODEINSTRUCTION.md` - This file
-
-## 4. Proceed With Work
+## 3. Proceed With Work
 Only after successfully completing steps 1 and 2 should you:
 - Begin planning new features
 - Make code modifications
