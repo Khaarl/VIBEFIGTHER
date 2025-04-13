@@ -203,7 +203,7 @@ class GameView(arcade.View):
 
         # Draw game elements
         if hasattr(self, 'background'):
-            arcade.draw_lrwh_rectangle_textured(0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT, self.background)
+            arcade.draw_lrbt_rectangle_textured(0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT, self.background)
 
         self.platform_list.draw()
         self.player_list.draw()

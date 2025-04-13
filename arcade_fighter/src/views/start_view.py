@@ -4,6 +4,8 @@ import random
 import math
 from typing import Optional
 from .. import constants as C
+from .button_factory import ButtonFactory
+from .asset_manager import AssetManager
 
 class TextButton:
     """ Complete text button implementation """
@@ -82,14 +84,9 @@ class StartView(arcade.View):
         super().__init__()
         self.menu_state = C.MENU_MAIN
         self.buttons = []
-        self.music_player = None
-        self.current_volume = C.DEFAULT_VOLUME
-        self.current_track = None
+        self.asset_manager = AssetManager()
         self.flicker_timer = 0
         self.symbol_alpha = 0
-        
-        # Load occult symbol texture
-        self.occult_symbol = arcade.load_texture(":resources:images/items/star.png")
         
         # Create title with custom font
         self.title = arcade.Text(
@@ -108,85 +105,73 @@ class StartView(arcade.View):
         """ Create buttons for all menu states """
         # Main Menu
         self.main_menu_buttons = [
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 50,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "New Game",
-                font_size=24
+                "main"
             ),
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "Options",
-                font_size=24
+                "main"
             ),
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "Exit",
-                font_size=24
+                "main"
             )
         ]
         
         # Options Menu
         self.options_menu_buttons = [
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 100,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "Video",
-                font_size=24
+                "options"
             ),
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 50,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "Audio",
-                font_size=24
+                "options"
             ),
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "Music",
-                font_size=24
+                "options"
             ),
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "Back",
-                font_size=24
+                "options"
             )
         ]
         
         # Video Settings Menu
         self.video_menu_buttons = [
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 150,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "SD (800x600)",
-                font_size=24
+                "video"
             ),
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 100,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "HD (1280x720)",
-                font_size=24
+                "video"
             ),
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 + 50,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "FHD (1920x1080)",
-                font_size=24
+                "video"
             ),
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "Fullscreen: ON" if C.FULLSCREEN else "Fullscreen: OFF",
-                font_size=24
+                "video"
             ),
-            TextButton(
+            ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
-                C.BUTTON_WIDTH, C.BUTTON_HEIGHT,
                 "Back",
-                font_size=24
+                "video"
             )
         ]
 
@@ -218,12 +203,12 @@ class StartView(arcade.View):
         self.menu_state = C.MENU_MAIN
         
         # Start random music if not already playing
-        if not self.music_player or not self.music_player.playing:
-            self.play_random_music()
+        if not self.asset_manager.music_player or not self.asset_manager.music_player.playing:
+            self.asset_manager.play_random_music(C.MUSIC_FILES)
             
         # Resume music if returning to view
-        elif self.music_player and not self.music_player.playing:
-            self.music_player.play()
+        elif self.asset_manager.music_player and not self.asset_manager.music_player.playing:
+            self.asset_manager.resume_music()
 
     def setup_background(self):
         """ Setup static background image """
@@ -275,7 +260,7 @@ class StartView(arcade.View):
             # Initialize symbol and sprite list if not exists
             if not hasattr(self, 'symbol'):
                 self.symbol = arcade.Sprite()
-                self.symbol.texture = self.occult_symbol
+                self.symbol.texture = self.asset_manager.occult_symbol
                 self.symbol_list = arcade.SpriteList()
                 self.symbol_list.append(self.symbol)
             
@@ -465,24 +450,6 @@ class StartView(arcade.View):
         """ Handle mouse movement """
         pass  # No interactive elements to handle
                 
-    def play_random_music(self):
-        """Play a randomly selected music track"""
-        import random
-        if self.music_player:
-            self.music_player.stop()
-            
-        self.current_track = random.choice(C.MUSIC_FILES)
-        sound = arcade.load_sound(self.current_track)
-        self.music_player = sound.play(volume=self.current_volume)
-        self.music_player.loop = True
-        
-    def adjust_volume(self, change: float):
-        """Adjust volume by specified amount (clamped to 0-1)"""
-        self.current_volume = max(0, min(1, self.current_volume + change))
-        if self.music_player:
-            self.music_player.volume = self.current_volume
-            
     def on_hide_view(self):
         """Called when leaving this view"""
-        if self.music_player:
-            self.music_player.pause()
+        self.asset_manager.pause_music()
