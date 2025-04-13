@@ -350,8 +350,12 @@ class StartView(arcade.View):
         """ Start the game """
         print("Starting GameView...")
         C.DEBUG_MODE = debug_mode
-        from src.views.game_view import GameView
-        game_view = GameView()
+        if debug_mode:
+            from src.views.debug_game_view import DebugGameView
+            game_view = DebugGameView()
+        else:
+            from src.views.game_view import GameView
+            game_view = GameView()
         self.window.show_view(game_view)
         game_view.setup()
 
