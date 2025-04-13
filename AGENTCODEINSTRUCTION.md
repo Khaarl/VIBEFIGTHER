@@ -16,7 +16,9 @@ Before starting any planning or coding work, follow these verification steps:
 - The project requires arcade version 3.1.0 or higher
 
 ## 3. Proceed With Work
-Only after successfully completing steps 1 and 2 should you:
-- Begin planning new features
+Only after successfully verifying:
+- Begin planning new features with Python Arcade Version: is 3.1.0 - always avoid duplicate code
+
 - Make code modifications
+and or
 - Debug errors and issues

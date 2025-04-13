@@ -163,31 +163,39 @@ class Character(arcade.Sprite):
             self.texture = self.death_texture_pair[self.facing_direction]
 
     def on_update(self, delta_time: float = 1/60):
-        """ Called by the arcade engine to update sprite state """
-
-        # Update timers
-        if self.attack_cooldown > 0:
-            self.attack_cooldown -= delta_time
+        # Update any timers
         if self.state_timer > 0:
             self.state_timer -= delta_time
+            
+            # Handle timer expiration transitions
             if self.state_timer <= 0:
-                # Reset state if timer runs out (e.g., after being hit or attacking)
-                if self.state == STATE_HIT or self.state == STATE_ATTACKING:
-                    self.state = STATE_IDLE # Or STATE_FALLING if in air
-
-        # State transition logic
-        if not self.is_on_ground and self.state not in (STATE_JUMPING, STATE_FALLING, STATE_ATTACKING, STATE_HIT, STATE_DEAD):
-            self.state = STATE_FALLING
-        elif self.is_on_ground and self.state == STATE_FALLING and self.change_y == 0:
-            self.state = STATE_IDLE
-
-        # Check if dead
-        if self.hp <= 0 and self.state != STATE_DEAD:
-            self.state = STATE_DEAD
-            self.change_x = 0
-            # Maybe change texture to a "defeated" pose
-            if C.DEBUG_MODE:
-                print(f"Player {self.player_num} is DEAD")
+                if self.state == C.STATE_ATTACKING or self.state == C.STATE_HIT:
+                    # Properly transition based on whether character is in air or on ground
+                    if self.is_on_ground:
+                        self.state = C.STATE_IDLE
+                    else:
+                        self.state = C.STATE_FALLING
+                
+        # Handle jumping and falling states
+        if self.state == C.STATE_JUMPING:
+            if self.change_y < 0:  # If we've started falling
+                self.state = C.STATE_FALLING
+        elif self.state == C.STATE_FALLING:
+            if self.is_on_ground:
+                self.state = C.STATE_IDLE
+                
+        # Update facing direction based on movement
+        if self.change_x < 0:
+            self.facing_right = False
+        elif self.change_x > 0:
+            self.facing_right = True
+            
+        # Handle idle/running state transitions (if not in a special state)
+        if self.state not in [C.STATE_ATTACKING, C.STATE_HIT, C.STATE_JUMPING, C.STATE_FALLING]:
+            if self.change_x == 0:
+                self.state = C.STATE_IDLE
+            else:
+                self.state = C.STATE_RUNNING
 
     def move(self, direction: int):
         """ Set horizontal movement speed based on direction (-1 left, 1 right) """

@@ -1,9 +1,7 @@
-
 import arcade
 from .. import constants as C
 from ..character import Character
-# Import GameOverView later for transitions
-# from .game_over_view import GameOverView
+from .game_over_view import GameOverView
 
 class GameView(arcade.View):
     """ Main application class where the fighting happens. """
@@ -72,7 +70,7 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
         self.platform_list = arcade.SpriteList(use_spatial_hash=True) # Spatial hash for static platforms
 
-        # --- Background Setup ---
+        # --- Background Setup --- 
         self.background = arcade.load_texture(
             "arcade_fighter/assets/LEVELS/Glacial-mountains/background_glacial_mountains.png"
         )
@@ -115,6 +113,21 @@ class GameView(arcade.View):
         self.round_number = 1
         self.player1_rounds_won = 0
         self.player2_rounds_won = 0
+
+        # Create attack hitboxes for both players
+        self._attack_hitbox = arcade.SpriteSolidColor(
+            int(self.player1_sprite.width * 0.5), 
+            int(self.player1_sprite.height * 0.5),
+            arcade.color.RED
+        )
+        self._attack_hitbox.alpha = 100
+        
+        self._attack_hitbox2 = arcade.SpriteSolidColor(
+            int(self.player2_sprite.width * 0.5), 
+            int(self.player2_sprite.height * 0.5),
+            arcade.color.RED
+        )
+        self._attack_hitbox2.alpha = 100
 
     def on_show_view(self):
         """ Called when switching to this view"""
@@ -397,66 +410,50 @@ class GameView(arcade.View):
                 self.player2_sprite.stop_moving()
 
     def check_attacks(self):
-        """ Check if any player attacks hit the other player. """
-        if not self.player1_sprite or not self.player2_sprite:
-            return
-
-        # Check Player 1 attacking Player 2
-        if self.player1_sprite.state == C.STATE_ATTACKING and self.player1_sprite.state_timer > (self.player1_sprite.attack_duration - 0.1):
-            # Simple hitbox in front of the player
-            hitbox_width = 60
-            hitbox_height = self.player1_sprite.height
-            hitbox_offset_x = 40 # How far in front
-            
-            if self.player1_sprite.facing_direction == C.RIGHT_FACING:
-                hitbox_center_x = self.player1_sprite.center_x + hitbox_offset_x
-            else: # LEFT_FACING
-                hitbox_center_x = self.player1_sprite.center_x - hitbox_offset_x
-            hitbox_center_y = self.player1_sprite.center_y
-
-            # Use pre-created hitbox if available, otherwise create
-            if not hasattr(self, '_attack_hitbox'):
-                self._attack_hitbox = arcade.SpriteSolidColor(60, 100, (0, 0, 0, 0))
-            
-            self._attack_hitbox.width = hitbox_width
-            self._attack_hitbox.height = hitbox_height
-            self._attack_hitbox.center_x = hitbox_center_x
-            self._attack_hitbox.center_y = hitbox_center_y
-            attack_hitbox = self._attack_hitbox
-            
-            if arcade.check_for_collision(attack_hitbox, self.player2_sprite):
-                # Hit detected!
-                # Prevent multiple hits per single attack animation/state
-                # We can check if the attack timer is near its start
-                if self.player1_sprite.state_timer > (self.player1_sprite.attack_duration - 0.1): # Allow hit near start of attack
-                     print(f"HIT! Player 1 attacks Player 2")
-                     self.player2_sprite.take_damage(self.player1_sprite.attack_damage)
-                     # Optional: Reset state timer slightly to prevent immediate re-hit
-                     # self.player1_sprite.state_timer = self.player1_sprite.attack_duration - 0.15 
-
-
-        # Check Player 2 attacking Player 1 (similar logic)
-        if self.player2_sprite.state == C.STATE_ATTACKING and self.player2_sprite.state_timer > (self.player2_sprite.attack_duration - 0.1):
-            hitbox_width = 60
-            hitbox_height = self.player2_sprite.height
-            hitbox_offset_x = 40
-            
-            if self.player2_sprite.facing_direction == C.RIGHT_FACING:
-                hitbox_center_x = self.player2_sprite.center_x + hitbox_offset_x
-            else: # LEFT_FACING
-                hitbox_center_x = self.player2_sprite.center_x - hitbox_offset_x
-            hitbox_center_y = self.player2_sprite.center_y
-
-            attack_hitbox = arcade.SpriteSolidColor(hitbox_width, hitbox_height, (0, 0, 0, 0)) # Transparent hitbox
-            attack_hitbox.center_x = hitbox_center_x
-            attack_hitbox.center_y = hitbox_center_y
-            
-            if arcade.check_for_collision(attack_hitbox, self.player1_sprite) and not self.player2_sprite.has_hit:
-                if self.player2_sprite.state_timer > (self.player2_sprite.attack_duration - 0.1):
-                     print(f"HIT! Player 2 attacks Player 1")
-                     self.player1_sprite.take_damage(self.player2_sprite.attack_damage)
-                     # Optional: Reset state timer slightly
-                     # self.player2_sprite.state_timer = self.player2_sprite.attack_duration - 0.15
+        """Check if player attack hits opponent"""
+        # Player 1 attack logic
+        if self.player1_sprite.state == C.STATE_ATTACKING:
+            # Only check hit during active attack frames
+            if self.player1_sprite.state_timer > (self.player1_sprite.attack_duration - 0.1) and not self.player1_sprite.has_hit:
+                # Update hitbox position based on facing direction
+                if self.player1_sprite.facing_right:
+                    hitbox_x = self.player1_sprite.center_x + self.player1_sprite.width * 0.3
+                else:
+                    hitbox_x = self.player1_sprite.center_x - self.player1_sprite.width * 0.3
+                    
+                self._attack_hitbox.position = hitbox_x, self.player1_sprite.center_y
+                
+                # Debug visualization
+                if C.DEBUG_MODE:
+                    self.debug_shapes.append(self._attack_hitbox)
+                
+                # Hit detection
+                if self._attack_hitbox.collides_with_sprite(self.player2_sprite):
+                    self.player2_sprite.take_damage(self.player1_sprite.attack_power)
+                    self.player1_sprite.has_hit = True
+                    self.hit_effects(self.player2_sprite)
+        
+        # Player 2 attack logic
+        if self.player2_sprite.state == C.STATE_ATTACKING:
+            # Only check hit during active attack frames
+            if self.player2_sprite.state_timer > (self.player2_sprite.attack_duration - 0.1) and not self.player2_sprite.has_hit:
+                # Update hitbox position based on facing direction
+                if self.player2_sprite.facing_right:
+                    hitbox_x = self.player2_sprite.center_x + self.player2_sprite.width * 0.3
+                else:
+                    hitbox_x = self.player2_sprite.center_x - self.player2_sprite.width * 0.3
+                
+                self._attack_hitbox2.position = hitbox_x, self.player2_sprite.center_y
+                
+                # Debug visualization
+                if C.DEBUG_MODE:
+                    self.debug_shapes.append(self._attack_hitbox2)
+                
+                # Hit detection
+                if self._attack_hitbox2.collides_with_sprite(self.player1_sprite):
+                    self.player1_sprite.take_damage(self.player2_sprite.attack_power)
+                    self.player2_sprite.has_hit = True
+                    self.hit_effects(self.player1_sprite)
 
     def reset_round(self):
         """ Resets player positions and health for the next round. """
@@ -507,7 +504,6 @@ class GameView(arcade.View):
             if self.player1_rounds_won >= C.ROUNDS_TO_WIN or self.player2_rounds_won >= C.ROUNDS_TO_WIN:
                 match_winner = 1 if self.player1_rounds_won > self.player2_rounds_won else 2
                 print(f"Match Over! Winner: Player {match_winner}")
-                from .game_over_view import GameOverView # Import here
                 game_over_view = GameOverView(winner=match_winner)
                 self.window.show_view(game_over_view)
             else:
