@@ -1,4 +1,8 @@
 import arcade
+from arcade import Text
+
+
+import arcade
 from .. import constants as C
 from ..character import Character
 from .game_over_view import GameOverView
@@ -6,6 +10,22 @@ from .game_over_view import GameOverView
 class GameView(arcade.View):
     """ Main application class where the fighting happens. """
 
+        # Text objects for UI
+        self.player1_text = None
+        self.player2_text = None
+        self.round_text = None
+        self.placeholder_text = None
+        self.debug_texts = []
+
+        # Variables that will hold sprite lists
+        # Text objects for UI
+        self.player1_text = None
+        self.player2_text = None
+        self.round_text = None
+        self.placeholder_text = None
+        self.debug_texts = []
+
+        # Variables that will hold sprite lists
     def __init__(self):
         """ Initializer """
         # Call the parent class initializer
@@ -55,6 +75,40 @@ class GameView(arcade.View):
         self.player1_sprite.center_x = C.SCREEN_WIDTH / 2
         self.player1_sprite.bottom = 64
         self.player_list.append(self.player1_sprite)
+        # Initialize Text objects
+        self.player1_text = arcade.Text(
+            "Player 1",
+            C.HEALTHBAR_PLAYER1_X,
+            C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 25,
+            arcade.color.WHITE,
+            C.UI_FONT_SIZE
+        )
+        
+        self.player2_text = arcade.Text(
+            "Player 2",
+            C.HEALTHBAR_PLAYER2_X,
+            C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 25,
+            arcade.color.WHITE,
+            C.UI_FONT_SIZE
+        )
+        
+        self.round_text = arcade.Text(
+            f"Round: {self.round_number}",
+            C.SCREEN_WIDTH / 2,
+            C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 10,
+            arcade.color.WHITE,
+            C.UI_FONT_SIZE,
+            anchor_x="center"
+        )
+        
+        self.placeholder_text = arcade.Text(
+            "Game View - Placeholder",
+            C.SCREEN_WIDTH / 2,
+            C.SCREEN_HEIGHT / 2,
+            arcade.color.WHITE,
+            font_size=30,
+            anchor_x="center"
+        )
         
         # Simplified physics
         self.physics_engine_p1 = arcade.PhysicsEnginePlatformer(
@@ -63,6 +117,40 @@ class GameView(arcade.View):
             gravity_constant=C.GRAVITY
         )
         
+        # Initialize Text objects
+        self.player1_text = arcade.Text(
+            "Player 1",
+            C.HEALTHBAR_PLAYER1_X,
+            C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 25,
+            arcade.color.WHITE,
+            C.UI_FONT_SIZE
+        )
+        
+        self.player2_text = arcade.Text(
+            "Player 2",
+            C.HEALTHBAR_PLAYER2_X,
+            C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 25,
+            arcade.color.WHITE,
+            C.UI_FONT_SIZE
+        )
+        
+        self.round_text = arcade.Text(
+            f"Round: {self.round_number}",
+            C.SCREEN_WIDTH / 2,
+            C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 10,
+            arcade.color.WHITE,
+            C.UI_FONT_SIZE,
+            anchor_x="center"
+        )
+        
+        self.placeholder_text = arcade.Text(
+            "Game View - Placeholder",
+            C.SCREEN_WIDTH / 2,
+            C.SCREEN_HEIGHT / 2,
+            arcade.color.WHITE,
+            font_size=30,
+            anchor_x="center"
+        )
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
         print("Setting up GameView...") # Debug print
@@ -167,6 +255,23 @@ class GameView(arcade.View):
                 self.player1_sprite.center_y,
                 self.player1_sprite.center_x + self.player1_sprite.change_x * 10,
                 self.player1_sprite.center_y + self.player1_sprite.change_y * 10,
+        # Create Text objects for UI elements
+        self.player1_text = Text("Player 1", C.HEALTHBAR_PLAYER1_X, C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 25,
+                              arcade.color.WHITE, C.UI_FONT_SIZE)
+        self.player2_text = Text("Player 2", C.HEALTHBAR_PLAYER2_X, C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 25,
+                              arcade.color.WHITE, C.UI_FONT_SIZE)
+        self.round_text = Text(f"Round: {self.round_number}", C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - 10,
+                          arcade.color.WHITE, C.UI_FONT_SIZE, anchor_x="center")
+        self.placeholder_text = Text("Game View - Placeholder", C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2,
+                          arcade.color.WHITE, font_size=30, anchor_x="center")
+
+        # Debug text
+        self.debug_texts = []
+        if C.DEBUG_SHOW_ANIM_STATES and self.player1_sprite:
+            self.debug_texts.append(Text(f"State: {self.player1_sprite.state}", 10, 10, arcade.color.WHITE, 14))
+
+        for i, text in enumerate(debug_text):
+            self.debug_texts.append(Text(text, 10, 30 + i * 20, arcade.color.WHITE, 14))
                 arcade.color.BLUE,
                 2
             )
@@ -174,6 +279,15 @@ class GameView(arcade.View):
         if C.DEBUG_SHOW_ANIM_STATES and self.player1_sprite:
             arcade.draw_text(
                 f"State: {self.player1_sprite.state}",
+        # Draw UI text elements
+        self.player1_text.draw()
+        self.player2_text.draw()
+        self.round_text.draw()
+        self.placeholder_text.draw()
+        
+        # Draw debug text if any
+        for text in self.debug_texts:
+            text.draw()
                 self.player1_sprite.left,
                 self.player1_sprite.top + 20,
                 arcade.color.WHITE,
@@ -216,7 +330,16 @@ class GameView(arcade.View):
 
         # Draw game elements
         if hasattr(self, 'background'):
-            arcade.draw_lrbt_rectangle_textured(0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT, self.background)
+        # Draw UI text elements
+        self.player1_text.draw()
+        self.player2_text.draw()
+        self.round_text.draw()
+        self.placeholder_text.draw()
+        
+        # Draw debug text if any
+        for text in self.debug_texts:
+            text.draw()
+            arcade.draw_lrbt_rectangle_filled(0, 0, C.SCREEN_WIDTH, C.SCREEN_HEIGHT, self.background)
 
         self.platform_list.draw()
         self.player_list.draw()
@@ -237,6 +360,14 @@ class GameView(arcade.View):
             arcade.draw_lrbt_rectangle_filled(left=C.HEALTHBAR_PLAYER1_X,
                                               right=C.HEALTHBAR_PLAYER1_X + health_width_p1,
                                               top=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y + C.HEALTHBAR_HEIGHT/2,
+        # Draw UI elements
+        self.player1_text.draw()
+        self.player2_text.draw()
+        self.round_text.draw()
+        self.placeholder_text.draw()
+        
+        for text in self.debug_texts:
+            text.draw()
                                               bottom=C.SCREEN_HEIGHT - C.HEALTHBAR_OFFSET_Y - C.HEALTHBAR_HEIGHT/2,
                                               color=C.HEALTH_COLOR)
             # Player 1 Text

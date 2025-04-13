@@ -22,4 +22,4 @@ Only after successfully verifying:
 - Make code modifications
 and or
 - Debug errors and issues
--confirm if you comply
+- confirm if you comply
