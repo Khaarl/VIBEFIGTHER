@@ -51,6 +51,28 @@ class DebugGameView(arcade.View):
         self.platform_list.draw()
         self.player_list.draw()
         
+        # Debug visualizations
+        if C.DEBUG_SHOW_HITBOXES:
+            for sprite in self.player_list:
+                arcade.draw_polygon_outline(sprite.hit_box.get_adjusted_points(),
+                                          arcade.color.RED, 1)
+            for platform in self.platform_list:
+                arcade.draw_polygon_outline(platform.hit_box.get_adjusted_points(),
+                                          arcade.color.BLUE, 1)
+        
+        if C.DEBUG_SHOW_VECTORS:
+            for sprite in self.player_list:
+                # Draw velocity vector
+                arcade.draw_line(sprite.center_x, sprite.center_y,
+                               sprite.center_x + sprite.change_x * 5,
+                               sprite.center_y + sprite.change_y * 5,
+                               arcade.color.GREEN, 2)
+                # Draw facing direction indicator
+                arcade.draw_line(sprite.center_x, sprite.center_y,
+                               sprite.center_x + sprite.facing_direction * 30,
+                               sprite.center_y,
+                               arcade.color.YELLOW, 2)
+        
     def on_key_press(self, key, modifiers):
         """Handle key presses for animation testing"""
         if not hasattr(self, 'player') or self.player is None:
@@ -118,3 +140,20 @@ class DebugGameView(arcade.View):
             print(f"Velocity: (X:{self.player.change_x:.1f}, Y:{self.player.change_y:.1f})")
             print(f"On ground: {self.physics_engine.can_jump()}")
             print(f"Keys pressed: {self.keys_pressed}")
+            
+            # Physics debug info
+            if hasattr(self.player, 'is_on_ground'):
+                print(f"Ground state: {self.player.is_on_ground}")
+            
+            # Collision checks
+            if hasattr(self.physics_engine, 'check_for_collision'):
+                collisions = self.physics_engine.check_for_collision()
+                if collisions:
+                    print(f"Collisions: {len(collisions)}")
+                    for i, collision in enumerate(collisions[:3], 1):
+                        print(f"  Collision {i}: {collision}")
+            
+            # State transition info
+            if hasattr(self.player, 'previous_state'):
+                if self.player.previous_state != self.player.state:
+                    print(f"State changed from {self.player.previous_state} to {self.player.state}")
