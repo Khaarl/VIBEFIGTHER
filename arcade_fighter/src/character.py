@@ -126,11 +126,26 @@ class Character(arcade.Sprite):
         Logic for selecting the proper texture to use.
         Also flips textures based on facing direction.
         """
+        # Only update if not in a locked state
+        if self.state in [STATE_ATTACKING, STATE_HIT, STATE_DEAD]:
+            return
+
         # Flip texture if direction changed
-        if self.change_x < 0 and self.facing_direction == RIGHT_FACING:
+        if self.change_x < 0:
             self.facing_direction = LEFT_FACING
-        elif self.change_x > 0 and self.facing_direction == LEFT_FACING:
+        elif self.change_x > 0:
             self.facing_direction = RIGHT_FACING
+
+        # Update state based on physics
+        if not self.is_on_ground:
+            if self.change_y > 0:
+                self.state = STATE_JUMPING
+            else:
+                self.state = STATE_FALLING
+        elif abs(self.change_x) > 0:
+            self.state = STATE_WALKING
+        else:
+            self.state = STATE_IDLE
 
         # Update texture based on state
         if self.state == STATE_IDLE:
@@ -141,15 +156,6 @@ class Character(arcade.Sprite):
             self.texture = self.jump_texture_pair[self.facing_direction]
         elif self.state == STATE_FALLING:
             self.texture = self.fall_texture_pair[self.facing_direction]
-        elif self.state == STATE_ATTACKING:
-            # Cycle through attack textures
-            attack_frame = int(self.state_timer / self.attack_duration * len(self.attack_textures))
-            attack_frame = min(attack_frame, len(self.attack_textures) - 1)
-            self.texture = self.attack_textures[attack_frame][self.facing_direction]
-        elif self.state == STATE_HIT:
-            self.texture = self.hit_texture_pair[self.facing_direction]
-        elif self.state == STATE_DEAD:
-            self.texture = self.death_texture_pair[self.facing_direction]
 
     def on_update(self, delta_time: float = 1/60):
         # Update any timers
@@ -158,33 +164,13 @@ class Character(arcade.Sprite):
             
             # Handle timer expiration transitions
             if self.state_timer <= 0:
-                if self.state == C.STATE_ATTACKING or self.state == C.STATE_HIT:
-                    # Properly transition based on whether character is in air or on ground
+                if self.state == STATE_ATTACKING:
+                    self.state = STATE_IDLE
+                elif self.state == STATE_HIT:
                     if self.is_on_ground:
-                        self.state = C.STATE_IDLE
+                        self.state = STATE_IDLE
                     else:
-                        self.state = C.STATE_FALLING
-                
-        # Handle jumping and falling states
-        if self.state == C.STATE_JUMPING:
-            if self.change_y < 0:  # If we've started falling
-                self.state = C.STATE_FALLING
-        elif self.state == C.STATE_FALLING:
-            if self.is_on_ground:
-                self.state = C.STATE_IDLE
-                
-        # Update facing direction based on movement
-        if self.change_x < 0:
-            self.facing_right = False
-        elif self.change_x > 0:
-            self.facing_right = True
-            
-        # Handle idle/running state transitions (if not in a special state)
-        if self.state not in [C.STATE_ATTACKING, C.STATE_HIT, C.STATE_JUMPING, C.STATE_FALLING]:
-            if self.change_x == 0:
-                self.state = C.STATE_IDLE
-            else:
-                self.state = C.STATE_RUNNING
+                        self.state = STATE_FALLING
 
     def move(self, direction: int):
         """ Set horizontal movement speed based on direction (-1 left, 1 right) """
