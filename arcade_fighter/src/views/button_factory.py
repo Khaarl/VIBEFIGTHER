@@ -26,7 +26,7 @@ class ButtonFactory:
             height=height,
             text=text,
             font_size=font_size,
-            font_color=font_color,
+            text_color=font_color, # Renamed font_color to text_color
             face_color=face_color,
             highlight_color=highlight_color,
             shadow_color=shadow_color,
@@ -57,9 +57,10 @@ class ButtonFactory:
 
 class TextButton:
     """Simple button with text that changes color when hovered"""
-    def __init__(self, center_x, center_y, width, height, text, 
+    def __init__(self, center_x, center_y, width, height, text,
                  font_size=18, face_color=arcade.color.DARK_BLUE_GRAY,
-                 highlight_color=arcade.color.WHITE, text_color=arcade.color.WHITE):
+                 highlight_color=arcade.color.WHITE, text_color=arcade.color.WHITE,
+                 shadow_color=arcade.color.BLACK, button_height=2): # Added shadow_color and button_height
         self.center_x = center_x
         self.center_y = center_y
         self.width = width
@@ -70,13 +71,18 @@ class TextButton:
         self.highlight_color = highlight_color
         self.text_color = text_color
         self.highlighted = False
+        self.shadow_color = shadow_color # Store shadow_color
+        self.button_height = button_height # Store button_height (Note: This name might conflict with the height parameter)
         
     def draw(self):
         """Draw the button with highlight if mouse is hovering"""
         # Draw button rectangle
-        arcade.draw_rectangle_filled(self.center_x, self.center_y, 
-                                     self.width, self.height, 
-                                     self.face_color)
+        # Calculate coordinates for lrbt rectangle
+        left = self.center_x - self.width / 2
+        right = self.center_x + self.width / 2
+        bottom = self.center_y - self.height / 2
+        top = self.center_y + self.height / 2
+        arcade.draw_lrbt_rectangle_filled(left, right, bottom, top, self.face_color)
         
         # Draw border if highlighted
         if self.highlighted:
