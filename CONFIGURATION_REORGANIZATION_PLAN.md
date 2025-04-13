@@ -1,38 +1,11 @@
-# Character Directions
-RIGHT_FACING = 0
-LEFT_FACING = 1
+# Configuration Reorganization Plan
 
-# Character States
-STATE_IDLE = "idle"
-STATE_WALKING = "walking"
-STATE_JUMPING = "jumping"
-STATE_ATTACKING = "attacking"
-STATE_HIT = "hit"
-STATE_DEAD = "dead"
+## Overview
+This document outlines the reorganization of all game configuration into constants.py following best practices.
 
-
-# UI Elements
-OCCULT_SYMBOL_SCALE = 0.15
-
-
-# UI Effects
-FLICKER_INTERVAL = 2.0  # seconds
-
-
-# Background Images
-BACKGROUND_IMAGES = [
-    "arcade_fighter/assets/images/STATIC/khaaaarl_giant_bat_spread_wings_screaming_sonic_wawwes_by_jun_b5f9261a-da76-43a2-b967-78bbf0a0dd63_1.png",
-    "arcade_fighter/assets/images/STATIC/khaaaarl_giant_bat_spread_wings_screaming_sonic_wawwes_by_jun_33df75ef-efbc-4a90-8a6f-8a656c8f9431_3.png"
-]
-
-
-# Menu States
-MENU_MAIN = "main"
-MENU_OPTIONS = "options"
-MENU_VIDEO = "video"
-MENU_AUDIO = "audio"
-MENU_MUSIC = "music"
-
+## New File Structure
+```python
+# arcade_fighter/src/constants.py
 """Centralized configuration for Arcade Fighter game"""
 
 import arcade
@@ -154,11 +127,7 @@ UI_FONT_SIZE = 18
 DEFAULT_VOLUME = 0.5
 MUSIC_FILES = [
     "arcade_fighter/assets/MUSIC/09 - DavidKBD - Purgatory Pack - MiniLoop 01.ogg",
-    "arcade_fighter/assets/MUSIC/12 - DavidKBD - Purgatory Pack - MiniLoop 04.ogg",
-    "arcade_fighter/assets/MUSIC/13 - DavidKBD - Purgatory Pack - MiniLoop 05.ogg",
-    "arcade_fighter/assets/MUSIC/17 - DavidKBD - Purgatory Pack - MiniLoop 09.ogg",
-    "arcade_fighter/assets/MUSIC/21 - DavidKBD - Purgatory Pack - MiniLoop 13.ogg",
-    "arcade_fighter/assets/MUSIC/22 - DavidKBD - Purgatory Pack - MiniLoop 14.ogg"
+    # ... other music files
 ]
 
 # ========================
@@ -176,9 +145,27 @@ DEBUG_TEXT_POSITION = (10, 10)
 # ========================
 def set_resolution(res_key: str):
     """Update resolution and dependent constants"""
-    global SCREEN_WIDTH, SCREEN_HEIGHT, _CURRENT_RESOLUTION, HEALTHBAR_PLAYER2_X
+    global SCREEN_WIDTH, SCREEN_HEIGHT, _CURRENT_RESOLUTION
     if res_key in RESOLUTIONS:
         _CURRENT_RESOLUTION = res_key
         SCREEN_WIDTH, SCREEN_HEIGHT = RESOLUTIONS[res_key]
         # Update resolution-dependent UI positions
         HEALTHBAR_PLAYER2_X = SCREEN_WIDTH - 50 - HEALTHBAR_WIDTH
+```
+
+## Implementation Steps
+1. Replace contents of constants.py with the above
+2. Update character.py to use the new constants:
+   - Remove hardcoded attack values
+   - Use CHARACTER_SCALING_BY_RESOLUTION
+3. Update game_view.py to:
+   - Use BACKGROUND_COLOR constant
+   - Use health bar color constants
+   - Remove hardcoded debug colors
+
+## Verification
+After implementation:
+1. Test resolution changes
+2. Verify all gameplay parameters work as expected
+3. Check UI elements render correctly
+4. Confirm debug functionality works

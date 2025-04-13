@@ -1,8 +1,8 @@
 import arcade
 import arcade.gui
 import math
-import src.constants as C
-from src.views.button_factory import TextButton, ButtonFactory
+from .. import constants as C
+from .button_factory import TextButton, ButtonFactory
 from .asset_manager import AssetManager
 class StartView(arcade.View):
     """ Optimized main menu view for FHD """

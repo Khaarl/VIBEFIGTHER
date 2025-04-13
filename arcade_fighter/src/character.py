@@ -56,13 +56,8 @@ class Character(arcade.Sprite):
         """Initialize character with optional scale.
         If scale is None, will calculate based on resolution."""
         if scale is None:
-            # Base scale on resolution - smaller screens get larger characters
-            if C.SCREEN_WIDTH <= 800:  # SD
-                scale = 1.2
-            elif C.SCREEN_WIDTH <= 1280:  # HD
-                scale = 1.0
-            else:  # FHD+
-                scale = 0.8
+            # Use predefined scaling based on resolution
+            scale = C.CHARACTER_SCALING_BY_RESOLUTION[C._CURRENT_RESOLUTION]
         super().__init__(scale=scale)
 
         # --- Player Identity ---
@@ -116,15 +111,9 @@ class Character(arcade.Sprite):
         # --- Combat ---
         self.has_hit = False # Tracks if attack has already hit
         self.attack_cooldown = 0.0
-        self.attack_duration = 0.5 # How long attack state lasts
-        self.attack_damage = 10
-        # Attack hitbox definition (width, height, offset_x, offset_y)
-        self.attack_hitbox = {
-            'width': 60,
-            'height': 100,
-            'offset_x': 40,
-            'offset_y': 0
-        }
+        self.attack_duration = C.ATTACK_DURATION
+        self.attack_damage = C.ATTACK_DAMAGE
+        self.attack_hitbox = C.ATTACK_HITBOX.copy() # Create a copy for each instance
 
         # --- Timers ---
         self.state_timer = 0.0 # Generic timer for states like 'hit' or 'attacking'
@@ -210,8 +199,6 @@ class Character(arcade.Sprite):
 
     def jump(self):
         """ Initiate a jump if on the ground """
-        # TODO: Check if on ground using physics engine info
-        # if self.physics_engine.can_jump(): # Requires passing engine or checking flag
         if self.is_on_ground and self.state != STATE_HIT and self.state != STATE_DEAD:
              self.change_y = C.PLAYER_JUMP_SPEED
              self.state = STATE_JUMPING
@@ -226,7 +213,7 @@ class Character(arcade.Sprite):
                 print(f"Player {self.player_num} ATTACK!")
             self.has_hit = False # Reset hit flag for new attack
             self.state = STATE_ATTACKING
-            self.attack_cooldown = 1.0 # Example: 1 second cooldown
+            self.attack_cooldown = C.ATTACK_COOLDOWN
             self.state_timer = self.attack_duration # Attack state lasts for this duration
             # Stop horizontal movement during attack? Optional.
             # self.change_x = 0
