@@ -122,11 +122,15 @@ class Character(arcade.Sprite):
     def move(self, direction: int):
         """ Set horizontal movement speed based on direction (-1 left, 1 right) """
         self.change_x = C.PLAYER_MOVEMENT_SPEED * direction
+        if C.DEBUG_MODE:
+            print(f"Player {self.player_num} MOVING: direction={direction}, change_x={self.change_x}")
             # TODO: Set state to WALKING if on ground?
 
     def stop_moving(self):
         """ Stop horizontal movement """
         self.change_x = 0
+        if C.DEBUG_MODE:
+            print(f"Player {self.player_num} STOPPED MOVING")
         # TODO: Set state to IDLE if on ground?
 
     def jump(self):
@@ -136,4 +140,6 @@ class Character(arcade.Sprite):
             self.state = STATE_JUMPING
             self.is_on_ground = False # Assume we left the ground
             if C.DEBUG_MODE:
-                print(f"Player {self.player_num} JUMP!")
+                print(f"Player {self.player_num} JUMP! change_y={self.change_y}")
+        elif C.DEBUG_MODE:
+            print(f"Player {self.player_num} JUMP ATTEMPTED BUT NOT GROUNDED")

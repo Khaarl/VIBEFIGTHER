@@ -164,10 +164,22 @@ MUSIC_FILES = [
 # ========================
 # DEBUG SETTINGS
 # ========================
-DEBUG_MODE = os.getenv('ARCADE_DEBUG', 'False').lower() in ('true', '1', 't')
-DEBUG_SHOW_HITBOXES = DEBUG_MODE
-DEBUG_SHOW_VECTORS = DEBUG_MODE
-DEBUG_SHOW_ANIM_STATES = DEBUG_MODE
+# Debug settings
+_DEBUG_MODE = os.getenv('ARCADE_DEBUG', 'False').lower() in ('true', '1', 't')
+
+def set_debug_mode(enabled: bool):
+    """Toggle debug mode at runtime"""
+    global _DEBUG_MODE, DEBUG_SHOW_HITBOXES, DEBUG_SHOW_VECTORS, DEBUG_SHOW_ANIM_STATES
+    _DEBUG_MODE = enabled
+    DEBUG_SHOW_HITBOXES = enabled
+    DEBUG_SHOW_VECTORS = enabled
+    DEBUG_SHOW_ANIM_STATES = enabled
+
+def get_debug_mode() -> bool:
+    """Get current debug mode state"""
+    return _DEBUG_MODE
+
+DEBUG_MODE = property(get_debug_mode, set_debug_mode)
 DEBUG_TEXT_COLOR = arcade.color.RED
 DEBUG_TEXT_POSITION = (10, 10)
 

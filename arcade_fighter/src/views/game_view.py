@@ -77,4 +77,44 @@ class GameView(arcade.View):
         # Initialize UI
         self._init_ui_elements()
 
+
+    def on_key_press(self, key, modifiers):
+        """Handle key press events with debug logging"""
+        # Debug toggle
+        if key == C.KEY_TOGGLE_DEBUG:
+            C.DEBUG_MODE = not C.DEBUG_MODE
+            print(f"\nDEBUG MODE {'ENABLED' if C.DEBUG_MODE else 'DISABLED'}\n")
+            return
+            
+        if C.DEBUG_MODE:
+            print(f"Key PRESSED: {key} (modifiers: {modifiers})")
+            
+        # Player 1 controls
+        if key == C.KEY_LEFT_P1:
+            self.player1_sprite.move(-1)
+        elif key == C.KEY_RIGHT_P1:
+            self.player1_sprite.move(1)
+        elif key == C.KEY_JUMP_P1:
+            self.player1_sprite.jump()
+            
+        # Player 2 controls
+        elif key == C.KEY_LEFT_P2:
+            self.player2_sprite.move(-1)
+        elif key == C.KEY_RIGHT_P2:
+            self.player2_sprite.move(1)
+        elif key == C.KEY_JUMP_P2:
+            self.player2_sprite.jump()
+            
+    def on_key_release(self, key, modifiers):
+        """Handle key release events with debug logging"""
+        if C.DEBUG_MODE:
+            print(f"Key RELEASED: {key}")
+            
+        # Player 1 controls
+        if key in (C.KEY_LEFT_P1, C.KEY_RIGHT_P1):
+            self.player1_sprite.stop_moving()
+            
+        # Player 2 controls
+        elif key in (C.KEY_LEFT_P2, C.KEY_RIGHT_P2):
+            self.player2_sprite.stop_moving()
     # Rest of the class implementation remains unchanged...
