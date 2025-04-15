@@ -143,3 +143,27 @@ class Character(arcade.Sprite):
                 print(f"Player {self.player_num} JUMP! change_y={self.change_y}")
         elif C.DEBUG_MODE:
             print(f"Player {self.player_num} JUMP ATTEMPTED BUT NOT GROUNDED")
+            
+    def attack(self):
+        """Initiate an attack if not already attacking"""
+        if hasattr(self, 'is_attacking') and self.is_attacking:
+            if C.DEBUG_MODE:
+                print(f"Player {self.player_num} ATTACK COOLDOWN")
+            return
+            
+        # Set attack state and timer
+        self.state = C.STATE_ATTACKING
+        self.is_attacking = True
+        self.state_timer = C.ATTACK_DURATION
+        
+        if C.DEBUG_MODE:
+            print(f"Player {self.player_num} ATTACK! Duration: {C.ATTACK_DURATION}s")
+            
+    def on_update(self, delta_time: float = 1/60):
+        """Update character state including attack cooldown"""
+        # Handle attack cooldown
+        if hasattr(self, 'is_attacking') and self.is_attacking:
+            if self.state_timer <= 0:
+                self.is_attacking = False
+                if C.DEBUG_MODE:
+                    print(f"Player {self.player_num} ATTACK COMPLETE")
