@@ -38,8 +38,8 @@ class BaseGameView(arcade.View):
             self.player2.bottom = 64
             self.player_list.append(self.player2)
             
-        # Setup physics
-        if hasattr(self, 'player1'):
+        # Setup physics (only create base engine for single player modes)
+        if player_count == 1 and hasattr(self, 'player1'):
             self.physics_engine = arcade.PhysicsEnginePlatformer(
                 self.player1,
                 self.platform_list,

@@ -91,6 +91,13 @@ GRAVITY = 1.0
 PLAYER_MOVEMENT_SPEED = 5
 PLAYER_JUMP_SPEED = 20
 
+# Animation Timing (Updates per frame - lower number is faster)
+UPDATES_PER_FRAME_WALK = 5
+UPDATES_PER_FRAME_ATTACK = 3
+UPDATES_PER_FRAME_HIT = 4
+UPDATES_PER_FRAME_DEATH = 8
+
+
 # Character
 CHARACTER_SCALING = 1.0
 CHARACTER_SCALING_BY_RESOLUTION = {
@@ -152,6 +159,8 @@ UI_FONT_SIZE = 18
 # AUDIO SETTINGS
 # ========================
 DEFAULT_VOLUME = 0.5
+SOUND_MENU_CLICK = ":resources:sounds/upgrade1.wav" # Placeholder click sound
+
 MUSIC_FILES = [
     "assets/MUSIC/09 - DavidKBD - Purgatory Pack - MiniLoop 01.ogg",
     "assets/MUSIC/12 - DavidKBD - Purgatory Pack - MiniLoop 04.ogg",

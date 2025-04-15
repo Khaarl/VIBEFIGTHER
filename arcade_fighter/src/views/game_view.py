@@ -86,4 +86,21 @@ class GameView(BaseGameView):
         # Player 2 controls
         elif key in (C.KEY_LEFT_P2, C.KEY_RIGHT_P2):
             self.player2_sprite.stop_moving()
+    def on_update(self, delta_time: float):
+        """ Update game state, physics, and animations """
+        # Update physics engines
+        self.physics_engine_p1.update()
+        self.physics_engine_p2.update()
+
+        # Update character animations
+        # Note: Character.update_animation currently has issues (walking, attack, etc.)
+        self.player1_sprite.update_animation(delta_time)
+        self.player2_sprite.update_animation(delta_time)
+
+        # Update character internal logic (timers, etc.)
+        self.player1_sprite.on_update(delta_time)
+        self.player2_sprite.on_update(delta_time)
+
+        # TODO: Add game logic updates (collision checks, scoring, round end, etc.)
+
     # Rest of the class implementation remains unchanged...

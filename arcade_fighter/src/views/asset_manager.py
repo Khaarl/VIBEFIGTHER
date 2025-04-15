@@ -5,7 +5,7 @@ import time
 import glob
 import sys
 from pathlib import Path
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List, Dict, Tuple, Callable, Any
 from .. import constants as C
 
 class AssetManager:
@@ -60,49 +60,38 @@ class AssetManager:
             if self.load_errors:
                 print(f"Encountered {len(self.load_errors)} errors")
 
-    def _load_texture(self, *path_parts) -> Optional[arcade.Texture]:
-        """Load texture with caching and error handling"""
+    def _load_asset(self, asset_type: str, load_func: Callable[[str], Any], cache: Dict[str, Any], *path_parts) -> Optional[Any]:
+        """Generic asset loading with caching and error handling."""
         path = self._get_asset_path(*path_parts)
-        
+        asset_name_for_error = f"{asset_type} {path}" # For error messages
+
         if not os.path.exists(path):
-            self.load_errors.append(f"Texture not found: {path}")
-            return None
-            
-        if path in self._texture_cache:
-            return self._texture_cache[path]
-            
-        try:
-            start = time.time()
-            texture = arcade.load_texture(path)
-            self._texture_cache[path] = texture
-            self.total_assets_loaded += 1
-            self.load_times[path] = time.time() - start
-            return texture
-        except Exception as e:
-            self.load_errors.append(f"Texture {path}: {str(e)}")
+            self.load_errors.append(f"{asset_type} not found: {path}")
             return None
 
-    def _load_sound(self, *path_parts) -> Optional[arcade.Sound]:
-        """Load sound with caching and error handling"""
-        path = self._get_asset_path(*path_parts)
-        
-        if not os.path.exists(path):
-            self.load_errors.append(f"Sound not found: {path}")
-            return None
-            
-        if path in self._sound_cache:
-            return self._sound_cache[path]
-            
+        if path in cache:
+            return cache[path]
+
         try:
             start = time.time()
-            sound = arcade.load_sound(path)
-            self._sound_cache[path] = sound
+            asset = load_func(path) # Call the specific loading function
+            cache[path] = asset
             self.total_assets_loaded += 1
             self.load_times[path] = time.time() - start
-            return sound
+            if C.DEBUG_MODE:
+                 print(f"Loaded {asset_type}: {path}")
+            return asset
         except Exception as e:
-            self.load_errors.append(f"Sound {path}: {str(e)}")
+            self.load_errors.append(f"Error loading {asset_name_for_error}: {str(e)}")
             return None
+
+    def _load_texture(self, *path_parts) -> Optional[arcade.Texture]:
+        """Load texture using generic asset loader"""
+        return self._load_asset("Texture", arcade.load_texture, self._texture_cache, *path_parts)
+
+    def _load_sound(self, *path_parts) -> Optional[arcade.Sound]:
+        """Load sound using generic asset loader"""
+        return self._load_asset("Sound", arcade.load_sound, self._sound_cache, *path_parts)
 
     def _load_occult_symbol(self):
         """Load the occult symbol with fallback"""

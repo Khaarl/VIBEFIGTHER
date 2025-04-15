@@ -102,6 +102,25 @@ class StartView(arcade.View):
             )
         ]
 
+        # Audio Settings Menu
+        self.audio_menu_buttons = [
+            ButtonFactory.create_menu_button(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
+                "Back",
+                "audio"
+            )
+        ]
+
+        # Music Settings Menu
+        self.music_menu_buttons = [
+            ButtonFactory.create_menu_button(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
+                "Back",
+                "music"
+            )
+        ]
+
+
     def create_debug_button(self):
         """Create debug mode toggle button"""
         debug_button = arcade.gui.UIFlatButton(
@@ -229,6 +248,13 @@ class StartView(arcade.View):
         elif self.menu_state == C.MENU_VIDEO:
             for button in self.video_menu_buttons:
                 button.draw()
+        elif self.menu_state == C.MENU_AUDIO:
+            for button in self.audio_menu_buttons:
+                button.draw()
+        elif self.menu_state == C.MENU_MUSIC:
+            for button in self.music_menu_buttons:
+                button.draw()
+
         elif self.menu_state == "mode_select":
             for button in self.mode_select_buttons:
                 button.draw()
@@ -238,6 +264,7 @@ class StartView(arcade.View):
         if self.menu_state == C.MENU_MAIN:
             for btn in self.main_menu_buttons:
                 if btn.check_mouse_press(x, y):
+                    self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
                     if btn.text == "New Game":
                         self.show_game_mode_selection()
                     elif btn.text == "Options":
@@ -248,6 +275,7 @@ class StartView(arcade.View):
         elif self.menu_state == "mode_select":
             for btn in self.mode_select_buttons:
                 if btn.check_mouse_press(x, y):
+                    self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
                     if btn.text == "Standard Mode":
                         self.start_game(debug_mode=False)
                     elif btn.text == "Debug Mode":
@@ -258,14 +286,63 @@ class StartView(arcade.View):
         elif self.menu_state == C.MENU_OPTIONS:
             for btn in self.options_menu_buttons:
                 if btn.check_mouse_press(x, y):
+                    self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
                     if btn.text == "Video":
                         self.menu_state = C.MENU_VIDEO
+                    elif btn.text == "Audio":
+                        self.menu_state = C.MENU_AUDIO # Go to Audio menu
+                    elif btn.text == "Music":
+                        self.menu_state = C.MENU_MUSIC # Go to Music menu
+                    elif btn.text == "Back":
+                        self.menu_state = C.MENU_MAIN
+
+        elif self.menu_state == C.MENU_VIDEO:
+            for btn in self.video_menu_buttons:
+                if btn.check_mouse_press(x, y):
+                    self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
+                    if btn.text.startswith("SD"):
+                        self.set_resolution("SD")
+                    elif btn.text.startswith("HD"):
+                        self.set_resolution("HD")
+                    elif btn.text.startswith("FHD"):
+                        self.set_resolution("FHD")
+                    elif btn.text.startswith("Fullscreen"):
+                        self.toggle_fullscreen()
+                    elif btn.text == "Back":
+                        self.menu_state = C.MENU_OPTIONS
+
+        elif self.menu_state == C.MENU_AUDIO:
+            for btn in self.audio_menu_buttons:
+                if btn.check_mouse_press(x, y):
+                    self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
+                    if btn.text == "Back":
+                        self.menu_state = C.MENU_OPTIONS
+                    # TODO: Add logic for other audio buttons here
+
+        elif self.menu_state == C.MENU_MUSIC:
+            for btn in self.music_menu_buttons:
+                if btn.check_mouse_press(x, y):
+                    self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
+                    if btn.text == "Back":
+                        self.menu_state = C.MENU_OPTIONS
+                    # TODO: Add logic for other music buttons here
+
+            for btn in self.options_menu_buttons:
+                if btn.check_mouse_press(x, y):
+                    self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
+                    if btn.text == "Video":
+                        self.menu_state = C.MENU_VIDEO
+                    elif btn.text == "Audio":
+                        self.menu_state = C.MENU_AUDIO # Go to Audio menu
+                    elif btn.text == "Music":
+                        self.menu_state = C.MENU_MUSIC # Go to Music menu
                     elif btn.text == "Back":
                         self.menu_state = C.MENU_MAIN
         
         elif self.menu_state == C.MENU_VIDEO:
             for btn in self.video_menu_buttons:
                 if btn.check_mouse_press(x, y):
+                    self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
                     if btn.text.startswith("SD"):
                         self.set_resolution("SD")
                     elif btn.text.startswith("HD"):
@@ -356,6 +433,8 @@ class StartView(arcade.View):
         else:
             from src.views.game_view import GameView
             game_view = GameView()
+        self.asset_manager.stop_music() # Stop menu music before switching
+
         self.window.show_view(game_view)
         game_view.setup()
 
