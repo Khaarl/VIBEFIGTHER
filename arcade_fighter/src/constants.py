@@ -153,12 +153,12 @@ UI_FONT_SIZE = 18
 # ========================
 DEFAULT_VOLUME = 0.5
 MUSIC_FILES = [
-    "arcade_fighter/assets/MUSIC/09 - DavidKBD - Purgatory Pack - MiniLoop 01.ogg",
-    "arcade_fighter/assets/MUSIC/12 - DavidKBD - Purgatory Pack - MiniLoop 04.ogg",
-    "arcade_fighter/assets/MUSIC/13 - DavidKBD - Purgatory Pack - MiniLoop 05.ogg",
-    "arcade_fighter/assets/MUSIC/17 - DavidKBD - Purgatory Pack - MiniLoop 09.ogg",
-    "arcade_fighter/assets/MUSIC/21 - DavidKBD - Purgatory Pack - MiniLoop 13.ogg",
-    "arcade_fighter/assets/MUSIC/22 - DavidKBD - Purgatory Pack - MiniLoop 14.ogg"
+    "assets/MUSIC/09 - DavidKBD - Purgatory Pack - MiniLoop 01.ogg",
+    "assets/MUSIC/12 - DavidKBD - Purgatory Pack - MiniLoop 04.ogg",
+    "assets/MUSIC/13 - DavidKBD - Purgatory Pack - MiniLoop 05.ogg",
+    "assets/MUSIC/17 - DavidKBD - Purgatory Pack - MiniLoop 09.ogg",
+    "assets/MUSIC/21 - DavidKBD - Purgatory Pack - MiniLoop 13.ogg",
+    "assets/MUSIC/22 - DavidKBD - Purgatory Pack - MiniLoop 14.ogg"
 ]
 
 # ========================
