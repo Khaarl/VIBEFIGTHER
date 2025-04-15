@@ -192,3 +192,27 @@ class AssetManager:
             self.music_player.loop = True
             return self.music_player
         return None
+
+    def play_random_music(self, music_files: list) -> Optional[arcade.Sound]:
+        """Play a random music track from the provided list"""
+        if not music_files:
+            return None
+            
+        music_path = random.choice(music_files)
+        return self._play_music(music_path)
+
+    def resume_music(self) -> None:
+        """Resume paused music playback"""
+        if self.music_player and not self.music_player.playing:
+            self.music_player.play()
+
+    def pause_music(self) -> None:
+        """Pause music playback"""
+        if self.music_player and self.music_player.playing:
+            self.music_player.pause()
+
+    def stop_music(self) -> None:
+        """Stop music playback completely"""
+        if self.music_player:
+            self.music_player.stop()
+            self.music_player = None

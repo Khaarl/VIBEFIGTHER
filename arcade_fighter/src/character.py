@@ -35,9 +35,26 @@ class Character(arcade.Sprite):
         self.walk_textures = [load_texture_pair(f"{base_path}Run.png")]
         self.jump_texture_pair = load_texture_pair(f"{base_path}Jump.png")
         self.fall_texture_pair = load_texture_pair(f"{base_path}Fall.png")
+        self.attack_textures = [
+            load_texture_pair(f"{base_path}Attack1.png"),
+            load_texture_pair(f"{base_path}Attack2.png")
+        ]
         
         # Reset current texture
         self.texture = self.idle_texture_pair[self.facing_direction]
+
+    def attack(self):
+        """Perform attack action"""
+        if hasattr(self, 'is_attacking') and self.is_attacking:
+            return
+            
+        self.is_attacking = True
+        self.state = C.STATE_ATTACKING
+        self.attack_frame = 0
+        self.attack_timer = 0.0
+        
+        # Set initial attack texture
+        self.texture = self.attack_textures[0][self.facing_direction]
         
     def __init__(self, player_num: int, scale: float = None):
         """Initialize character with optional scale.
@@ -122,16 +139,18 @@ class Character(arcade.Sprite):
     def move(self, direction: int):
         """ Set horizontal movement speed based on direction (-1 left, 1 right) """
         self.change_x = C.PLAYER_MOVEMENT_SPEED * direction
+        if self.is_on_ground:
+            self.state = STATE_WALKING
         if C.DEBUG_MODE:
             print(f"Player {self.player_num} MOVING: direction={direction}, change_x={self.change_x}")
-            # TODO: Set state to WALKING if on ground?
 
     def stop_moving(self):
         """ Stop horizontal movement """
         self.change_x = 0
+        if self.is_on_ground:
+            self.state = STATE_IDLE
         if C.DEBUG_MODE:
             print(f"Player {self.player_num} STOPPED MOVING")
-        # TODO: Set state to IDLE if on ground?
 
     def jump(self):
         """ Initiate a jump if on the ground """
@@ -143,27 +162,3 @@ class Character(arcade.Sprite):
                 print(f"Player {self.player_num} JUMP! change_y={self.change_y}")
         elif C.DEBUG_MODE:
             print(f"Player {self.player_num} JUMP ATTEMPTED BUT NOT GROUNDED")
-            
-    def attack(self):
-        """Initiate an attack if not already attacking"""
-        if hasattr(self, 'is_attacking') and self.is_attacking:
-            if C.DEBUG_MODE:
-                print(f"Player {self.player_num} ATTACK COOLDOWN")
-            return
-            
-        # Set attack state and timer
-        self.state = C.STATE_ATTACKING
-        self.is_attacking = True
-        self.state_timer = C.ATTACK_DURATION
-        
-        if C.DEBUG_MODE:
-            print(f"Player {self.player_num} ATTACK! Duration: {C.ATTACK_DURATION}s")
-            
-    def on_update(self, delta_time: float = 1/60):
-        """Update character state including attack cooldown"""
-        # Handle attack cooldown
-        if hasattr(self, 'is_attacking') and self.is_attacking:
-            if self.state_timer <= 0:
-                self.is_attacking = False
-                if C.DEBUG_MODE:
-                    print(f"Player {self.player_num} ATTACK COMPLETE")
