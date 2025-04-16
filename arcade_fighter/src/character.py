@@ -30,7 +30,6 @@ from .constants import (
     STATE_IDLE,
     STATE_WALKING,
     STATE_JUMPING,
-    STATE_FALLING,
     STATE_ATTACKING,
     STATE_HIT,
     STATE_DEAD,
@@ -139,8 +138,15 @@ class Character(arcade.Sprite):
         if scale is None:
             # Use predefined scaling based on resolution
             scale = C.CHARACTER_SCALING_BY_RESOLUTION[C._CURRENT_RESOLUTION]
-        # Initialize sprite without texture first, as reload_textures handles it
-        super().__init__(scale=scale)
+        
+        # Initialize parent Sprite class first
+        super().__init__(filename=None, scale=scale)
+        
+        # Ensure required attributes exist
+        if not hasattr(self, '_position'):
+            self._position = [0.0, 0.0]
+        if not hasattr(self, '_angle'):
+            self._angle = 0.0
 
         # --- Player Identity ---
         self.player_num = player_num
@@ -178,6 +184,10 @@ class Character(arcade.Sprite):
         self.is_on_ground = False # Will be updated by physics engine checks
 
         # --- Timers ---
+        # Jump input buffering
+        self.jump_pressed_time = 0.0
+        self.jump_buffer_time = 0.1  # 100ms buffer window
+
         self.state_timer = 0.0 # Generic timer, might need more specific ones (attack cooldown, hit stun)
 
         if C.DEBUG_MODE:
@@ -203,7 +213,7 @@ class Character(arcade.Sprite):
             if self.change_y > 0.1:
                  current_physics_state = STATE_JUMPING
             else:
-                 current_physics_state = STATE_FALLING
+                 current_physics_state = STATE_JUMPING
         elif abs(self.change_x) > 0.1: # Use a small tolerance for horizontal movement
             current_physics_state = STATE_WALKING
 
@@ -239,8 +249,6 @@ class Character(arcade.Sprite):
         elif self.state == STATE_JUMPING:
             if self.jump_texture_pair[0]: self.texture = self.jump_texture_pair[self.facing_direction]
             return # Jump has no frame sequence (usually)
-        elif self.state == STATE_FALLING:
-            if self.fall_texture_pair[0]: self.texture = self.fall_texture_pair[self.facing_direction]
             return # Fall has no frame sequence (usually)
         elif self.state == STATE_ATTACKING:
             if self.attack_textures: texture_list = self.attack_textures
@@ -260,7 +268,7 @@ class Character(arcade.Sprite):
         if not texture_list: # If no textures for current state, fallback to idle
              if self.idle_texture_pair[0]: self.texture = self.idle_texture_pair[self.facing_direction]
              # Log warning if state should have had textures but didn't
-             if self.state not in [STATE_IDLE, STATE_JUMPING, STATE_FALLING]:
+             if self.state not in [STATE_IDLE, STATE_JUMPING]:
                  print(f"Warning: Missing textures for state {self.state}")
              return
 
@@ -279,7 +287,7 @@ class Character(arcade.Sprite):
                 elif self.state in [STATE_ATTACKING, STATE_HIT]:
                     # Determine state to return to *after* action completes
                     if not self.is_on_ground:
-                        next_state = STATE_FALLING if self.change_y < 0 else STATE_JUMPING
+                        next_state = STATE_JUMPING # Simplified: Use JUMPING for all airborne states
                     elif abs(self.change_x) > 0.1:
                         next_state = STATE_WALKING
                     else:
@@ -332,12 +340,18 @@ class Character(arcade.Sprite):
             if C.DEBUG_MODE:
                 print(f"Player {self.player_num} STOPPED MOVING")
 
+
     def jump(self):
-        """ Initiate a jump if on the ground and not in a blocking state """
-        if self.is_on_ground and self.state not in [STATE_ATTACKING, STATE_HIT, STATE_DEAD]:
+        """ Initiate a jump if on the ground or within buffer window """
+        # Record jump input time
+        self.jump_pressed_time = 0.0  # Reset buffer timer
+        
+        # Check if we can jump now
+        if (self.is_on_ground or self.jump_pressed_time < self.jump_buffer_time) and \
+           self.state not in [STATE_ATTACKING, STATE_HIT, STATE_DEAD]:
             self.change_y = C.PLAYER_JUMP_SPEED
-            # State change to jumping is handled in update_animation based on change_y and is_on_ground
-            self.is_on_ground = False # Assume we left the ground immediately
+            self.is_on_ground = False
+            self.jump_pressed_time = self.jump_buffer_time  # Prevent double jumps
             if C.DEBUG_MODE:
                 print(f"Player {self.player_num} JUMP! change_y={self.change_y}")
         elif C.DEBUG_MODE:
@@ -345,3 +359,9 @@ class Character(arcade.Sprite):
                  print(f"Player {self.player_num} JUMP ATTEMPTED BUT NOT GROUNDED")
             else:
                  print(f"Player {self.player_num} JUMP ATTEMPTED BUT IN STATE {self.state}")
+
+    def on_update(self, delta_time: float = 1/60):
+        """Update jump buffer timer"""
+        if self.jump_pressed_time < self.jump_buffer_time:
+            self.jump_pressed_time += delta_time
+        super().on_update(delta_time)

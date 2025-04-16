@@ -160,14 +160,17 @@ class StartView(arcade.View):
         """ Setup static background image """
         self.background_sprites = arcade.SpriteList()
         import random
-        bg_image = random.choice(C.BACKGROUND_IMAGES)
-        self.background = arcade.Sprite(
-            bg_image,
-            center_x=C.SCREEN_WIDTH/2,
-            center_y=C.SCREEN_HEIGHT/2,
-            image_width=C.SCREEN_WIDTH,
-            image_height=C.SCREEN_HEIGHT
-        )
+        # Get a pre-loaded texture from AssetManager instead of path
+        if self.asset_manager.backgrounds:
+            bg_texture = random.choice(self.asset_manager.backgrounds)
+            self.background = arcade.Sprite(bg_texture) # Pass texture as first argument
+            self.background.center_x = C.SCREEN_WIDTH / 2
+            self.background.center_y = C.SCREEN_HEIGHT / 2
+            # Scale sprite to fit screen
+            self.background.scale = max(C.SCREEN_WIDTH / self.background.width, C.SCREEN_HEIGHT / self.background.height)
+        else:
+            print("Warning: No background textures loaded by AssetManager in StartView!")
+            self.background = None # Fallback if no backgrounds loaded
         self.background_sprites.append(self.background)
         
         # Optimized particle effects

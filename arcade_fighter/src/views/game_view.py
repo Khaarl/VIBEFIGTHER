@@ -32,15 +32,18 @@ class GameView(BaseGameView):
         self.player2_rounds_won = 0
 
         # Setup physics engines for both players
+        # Add small padding (2 pixels) to make ground detection more lenient
         self.physics_engine_p1 = arcade.PhysicsEnginePlatformer(
             self.player1,
             self.platform_list,
-            gravity_constant=C.GRAVITY
+            gravity_constant=C.GRAVITY,
+            platforms_padding=2
         )
         self.physics_engine_p2 = arcade.PhysicsEnginePlatformer(
             self.player2,
             self.platform_list,
-            gravity_constant=C.GRAVITY
+            gravity_constant=C.GRAVITY,
+            platforms_padding=2
         )
 
         # Initialize UI
