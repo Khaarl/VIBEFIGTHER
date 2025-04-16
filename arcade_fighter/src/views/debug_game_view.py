@@ -16,11 +16,22 @@ class DebugGameView(BaseGameView):
         
         # Setup common environment with single player
         super().setup_environment(player_count=1)
-        self.player = self.player1  # Alias for clarity
-        
+        # self.player1 is already available from BaseGameView
+
         if C.DEBUG_MODE:
             print("DebugGameView setup complete")
-            print(f"Player position: ({self.player.center_x}, {self.player.center_y})")
+            if self.player1:
+                print(f"Player position: ({self.player1.center_x}, {self.player1.center_y})")
+
+        # --- Setup Key Mappings for Debug ---
+        if self.player1:
+            self.key_map_press[arcade.key.LEFT] = (self.player1, 'move', (-1,))
+            self.key_map_press[arcade.key.RIGHT] = (self.player1, 'move', (1,))
+            self.key_map_press[arcade.key.UP] = (self.player1, 'jump', ())
+            self.key_map_press[arcade.key.SPACE] = (self.player1, 'attack', ()) # Assuming SPACE is attack
+
+            self.key_map_release[arcade.key.LEFT] = (self.player1, 'stop_moving', ())
+            self.key_map_release[arcade.key.RIGHT] = (self.player1, 'stop_moving', ())
         
     def on_draw(self):
         """Render the screen"""
@@ -52,71 +63,65 @@ class DebugGameView(BaseGameView):
         
     def on_key_press(self, key, modifiers):
         """Handle key presses for animation testing"""
-        if not hasattr(self, 'player') or self.player is None:
+        if not self.player1: # Check if player1 exists
             return
-            
+
         self.keys_pressed.add(key)
-        
-        try:
-            if key == arcade.key.LEFT:
-                self.player.move(-1)
-            elif key == arcade.key.RIGHT:
-                self.player.move(1)
-            elif key == arcade.key.SPACE:
-                self.player.attack()
-            elif key == arcade.key.UP:
-                self.player.jump()
-        except AttributeError as e:
-            print(f"Debug: Key press error - {str(e)}")
+
+        # Handle player controls via the base class and key map
+        super().on_key_press(key, modifiers)
             
     def on_key_release(self, key, modifiers):
         """Handle key releases"""
-        if not hasattr(self, 'player') or self.player is None:
+        if not self.player1: # Check if player1 exists
             return
-            
+
+        # Keep track of pressed keys for debug display
         if key in self.keys_pressed:
             self.keys_pressed.remove(key)
+
+        # Handle player controls via the base class and key map
+        super().on_key_release(key, modifiers)
             
-        try:
-            if key in (arcade.key.LEFT, arcade.key.RIGHT):
-                self.player.stop_moving()
-        except AttributeError as e:
-            print(f"Debug: Key release error - {str(e)}")
-            
-    def update(self, delta_time):
-        """Game logic updates"""
-        if not hasattr(self, 'player') or self.player is None:
+    def on_update(self, delta_time):
+        """Game logic updates, including base updates and debug logging"""
+        if not self.player1 or not self.physics_engines: # Ensure player and engines exist
             return
-            
-        # Update physics first
-        self.physics_engine.update()
-        
-        # Update animations and character state
-        self.player.update_animation(delta_time)
-        self.player.update()
-        
+
+        # Call base class update logic (handles physics, player animations, player logic)
+        super().on_update(delta_time)
+
+        # Get the physics engine for player 1
+        physics_engine_p1 = self.physics_engines[0]
+
         # Detailed debug logging
         if C.DEBUG_MODE:
             print(f"\n--- Frame Update ---")
-            print(f"State: {self.player.state}")
-            print(f"Position: ({self.player.center_x:.1f}, {self.player.center_y:.1f})")
-            print(f"Velocity: (X:{self.player.change_x:.1f}, Y:{self.player.change_y:.1f})")
-            print(f"On ground: {self.physics_engine.can_jump()}")
+            print(f"State: {self.player1.state}")
+            print(f"Position: ({self.player1.center_x:.1f}, {self.player1.center_y:.1f})")
+            print(f"Velocity: (X:{self.player1.change_x:.1f}, Y:{self.player1.change_y:.1f})")
+            print(f"On ground: {physics_engine_p1.can_jump()}")
             print(f"Keys pressed: {self.keys_pressed}")
-            
+
             # Physics debug info
-            if hasattr(self.player, 'is_on_ground'):
-                print(f"Ground state: {self.player.is_on_ground}")
-            
+            if hasattr(self.player1, 'is_on_ground'):
+                print(f"Ground state: {self.player1.is_on_ground}")
+
             # Collision checks
-            if hasattr(self.physics_engine, 'check_for_collision'):
-                collisions = self.physics_engine.check_for_collision()
-                if collisions:
-                    print(f"Collisions: {len(collisions)}")
-                    for i, collision in enumerate(collisions[:3], 1):
-                        print(f"  Collision {i}: {collision}")
-            
+            if hasattr(physics_engine_p1, 'check_for_collision'):
+                # Note: check_for_collision might not be a public method or might work differently
+                # This part might need adjustment based on Arcade's API or intended use
+                try:
+                    collisions = physics_engine_p1.check_for_collision()
+                    if collisions:
+                        print(f"Collisions: {len(collisions)}")
+                        for i, collision in enumerate(collisions[:3], 1):
+                            print(f"  Collision {i}: {collision}")
+                except AttributeError:
+                     print("Debug: physics_engine has no 'check_for_collision' method.")
+
+
             # State transition info
-            if hasattr(self.player, 'previous_state'):
-                if self.player.previous_state != self.player.state:
-                    print(f"State changed from {self.player.previous_state} to {self.player.state}")
+            if hasattr(self.player1, 'previous_state'):
+                if self.player1.previous_state != self.player1.state:
+                    print(f"State changed from {self.player1.previous_state} to {self.player1.state}")

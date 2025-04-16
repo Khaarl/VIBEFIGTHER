@@ -14,12 +14,9 @@ Before starting any planning or coding work, follow these verification steps:
   python -c "import arcade; print(arcade.__version__)"
   ```
 - The project requires arcade version 3.1.0 or higher
+- manual for best practice: https://api.arcade.academy/en/latest/
 
 ## 3. Proceed With Work
 Only after successfully verifying:
-- Begin planning new features with Python Arcade Version: is 3.1.0 - always avoid duplicate code
-
-- Make code modifications
-and or
-- Debug errors and issues
-- confirm if you comply
+- Begin planning new features with Python Arcade Version: is 3.1.0 
+- before finishing task always check for duplicate code, if duplicates found remove them

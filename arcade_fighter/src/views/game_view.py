@@ -15,8 +15,6 @@ class GameView(BaseGameView):
         self.round_text = None
         self.placeholder_text = None
         self.debug_texts = []
-        self.physics_engine_p1 = None
-        self.physics_engine_p2 = None
 
     def setup(self):
         """Set up the game with initial state"""
@@ -31,23 +29,34 @@ class GameView(BaseGameView):
         self.player1_rounds_won = 0
         self.player2_rounds_won = 0
 
-        # Setup physics engines for both players
-        # Add small padding (2 pixels) to make ground detection more lenient
-        self.physics_engine_p1 = arcade.PhysicsEnginePlatformer(
-            self.player1,
-            self.platform_list,
-            gravity_constant=C.GRAVITY,
-            platforms_padding=2
-        )
-        self.physics_engine_p2 = arcade.PhysicsEnginePlatformer(
-            self.player2,
-            self.platform_list,
-            gravity_constant=C.GRAVITY,
-            platforms_padding=2
-        )
+        # Physics engines are now set up in BaseGameView.setup_environment
 
         # Initialize UI
         self._init_ui_elements()
+
+        # --- Setup Key Mappings ---
+        # Ensure players exist before mapping keys
+        if self.player1:
+            self.key_map_press[C.KEY_LEFT_P1] = (self.player1, 'move', (-1,))
+            self.key_map_press[C.KEY_RIGHT_P1] = (self.player1, 'move', (1,))
+            self.key_map_press[C.KEY_JUMP_P1] = (self.player1, 'jump', ())
+            # Add attack key if defined
+            if hasattr(C, 'KEY_ATTACK_P1'):
+                 self.key_map_press[C.KEY_ATTACK_P1] = (self.player1, 'attack', ())
+
+            self.key_map_release[C.KEY_LEFT_P1] = (self.player1, 'stop_moving', ())
+            self.key_map_release[C.KEY_RIGHT_P1] = (self.player1, 'stop_moving', ())
+
+        if self.player2:
+            self.key_map_press[C.KEY_LEFT_P2] = (self.player2, 'move', (-1,))
+            self.key_map_press[C.KEY_RIGHT_P2] = (self.player2, 'move', (1,))
+            self.key_map_press[C.KEY_JUMP_P2] = (self.player2, 'jump', ())
+            # Add attack key if defined
+            if hasattr(C, 'KEY_ATTACK_P2'):
+                 self.key_map_press[C.KEY_ATTACK_P2] = (self.player2, 'attack', ())
+
+            self.key_map_release[C.KEY_LEFT_P2] = (self.player2, 'stop_moving', ())
+            self.key_map_release[C.KEY_RIGHT_P2] = (self.player2, 'stop_moving', ())
 
 
     def on_key_press(self, key, modifiers):
@@ -58,51 +67,25 @@ class GameView(BaseGameView):
             print(f"\nDEBUG MODE {'ENABLED' if C.DEBUG_MODE else 'DISABLED'}\n")
             return
             
+        # Handle player controls via the base class and key map
+        super().on_key_press(key, modifiers)
+
+        # Keep debug logging if needed
         if C.DEBUG_MODE:
             print(f"Key PRESSED: {key} (modifiers: {modifiers})")
             
-        # Player 1 controls
-        if key == C.KEY_LEFT_P1:
-            self.player1_sprite.move(-1)
-        elif key == C.KEY_RIGHT_P1:
-            self.player1_sprite.move(1)
-        elif key == C.KEY_JUMP_P1:
-            self.player1_sprite.jump()
-            
-        # Player 2 controls
-        elif key == C.KEY_LEFT_P2:
-            self.player2_sprite.move(-1)
-        elif key == C.KEY_RIGHT_P2:
-            self.player2_sprite.move(1)
-        elif key == C.KEY_JUMP_P2:
-            self.player2_sprite.jump()
-            
     def on_key_release(self, key, modifiers):
         """Handle key release events with debug logging"""
+        # Handle player controls via the base class and key map
+        super().on_key_release(key, modifiers)
+
+        # Keep debug logging if needed
         if C.DEBUG_MODE:
             print(f"Key RELEASED: {key}")
-            
-        # Player 1 controls
-        if key in (C.KEY_LEFT_P1, C.KEY_RIGHT_P1):
-            self.player1_sprite.stop_moving()
-            
-        # Player 2 controls
-        elif key in (C.KEY_LEFT_P2, C.KEY_RIGHT_P2):
-            self.player2_sprite.stop_moving()
     def on_update(self, delta_time: float):
         """ Update game state, physics, and animations """
-        # Update physics engines
-        self.physics_engine_p1.update()
-        self.physics_engine_p2.update()
-
-        # Update character animations
-        # Note: Character.update_animation currently has issues (walking, attack, etc.)
-        self.player1_sprite.update_animation(delta_time)
-        self.player2_sprite.update_animation(delta_time)
-
-        # Update character internal logic (timers, etc.)
-        self.player1_sprite.on_update(delta_time)
-        self.player2_sprite.on_update(delta_time)
+        # Call base class update logic (handles physics, player animations, player logic)
+        super().on_update(delta_time)
 
         # TODO: Add game logic updates (collision checks, scoring, round end, etc.)
 
