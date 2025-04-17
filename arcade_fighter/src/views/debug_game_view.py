@@ -96,32 +96,33 @@ class DebugGameView(BaseGameView):
 
         # Detailed debug logging
         if C.DEBUG_MODE:
-            print(f"\n--- Frame Update ---")
-            print(f"State: {self.player1.state}")
-            print(f"Position: ({self.player1.center_x:.1f}, {self.player1.center_y:.1f})")
-            print(f"Velocity: (X:{self.player1.change_x:.1f}, Y:{self.player1.change_y:.1f})")
-            print(f"On ground: {physics_engine_p1.can_jump()}")
-            print(f"Keys pressed: {self.keys_pressed}")
-
-            # Physics debug info
-            if hasattr(self.player1, 'is_on_ground'):
-                print(f"Ground state: {self.player1.is_on_ground}")
-
-            # Collision checks
-            if hasattr(physics_engine_p1, 'check_for_collision'):
-                # Note: check_for_collision might not be a public method or might work differently
-                # This part might need adjustment based on Arcade's API or intended use
-                try:
-                    collisions = physics_engine_p1.check_for_collision()
-                    if collisions:
-                        print(f"Collisions: {len(collisions)}")
-                        for i, collision in enumerate(collisions[:3], 1):
-                            print(f"  Collision {i}: {collision}")
-                except AttributeError:
-                     print("Debug: physics_engine has no 'check_for_collision' method.")
-
-
-            # State transition info
-            if hasattr(self.player1, 'previous_state'):
-                if self.player1.previous_state != self.player1.state:
-                    print(f"State changed from {self.player1.previous_state} to {self.player1.state}")
+            # print(f"\n--- Frame Update ---")
+            # print(f"State: {self.player1.state}")
+            # print(f"Position: ({self.player1.center_x:.1f}, {self.player1.center_y:.1f})")
+            # print(f"Velocity: (X:{self.player1.change_x:.1f}, Y:{self.player1.change_y:.1f})")
+            # print(f"On ground: {physics_engine_p1.can_jump()}")
+            # print(f"Keys pressed: {self.keys_pressed}")
+            #
+            # # Physics debug info
+            # if hasattr(self.player1, 'is_on_ground'):
+            #     print(f"Ground state: {self.player1.is_on_ground}")
+            #
+            # # Collision checks
+            # if hasattr(physics_engine_p1, 'check_for_collision'):
+            #     # Note: check_for_collision might not be a public method or might work differently
+            #     # This part might need adjustment based on Arcade's API or intended use
+            #     try:
+            #         collisions = physics_engine_p1.check_for_collision()
+            #         if collisions:
+            #             print(f"Collisions: {len(collisions)}")
+            #             for i, collision in enumerate(collisions[:3], 1):
+            #                 print(f"  Collision {i}: {collision}")
+            #     except AttributeError:
+            #          print("Debug: physics_engine has no 'check_for_collision' method.")
+            #
+            #
+            # # State transition info
+            # if hasattr(self.player1, 'previous_state'):
+            #     if self.player1.previous_state != self.player1.state:
+            #         print(f"State changed from {self.player1.previous_state} to {self.player1.state}")
+            pass # Keep the if block valid syntax

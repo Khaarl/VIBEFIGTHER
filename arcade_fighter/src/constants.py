@@ -162,12 +162,24 @@ DEFAULT_VOLUME = 0.5
 SOUND_MENU_CLICK = ":resources:sounds/upgrade1.wav" # Placeholder click sound
 
 MUSIC_FILES = [
+    "assets/MUSIC/01 - DavidKBD - Purgatory Pack - Purgatory.ogg",
+    "assets/MUSIC/02 - DavidKBD - Purgatory Pack - Gateways.ogg",
+    "assets/MUSIC/03 - DavidKBD - Purgatory Pack - Sacrifice.ogg",
+    "assets/MUSIC/04 - DavidKBD - Purgatory Pack - Life Eternal.ogg",
+    "assets/MUSIC/05 - DavidKBD - Purgatory Pack - From the Dark Past.ogg",
+    "assets/MUSIC/06 - DavidKBD - Purgatory Pack - On Fire.ogg",
+    "assets/MUSIC/07 - DavidKBD - Purgatory Pack - Hades.ogg",
+    "assets/MUSIC/08 - DavidKBD - Purgatory Pack - The ritualist.ogg",
     "assets/MUSIC/09 - DavidKBD - Purgatory Pack - MiniLoop 01.ogg",
     "assets/MUSIC/12 - DavidKBD - Purgatory Pack - MiniLoop 04.ogg",
     "assets/MUSIC/13 - DavidKBD - Purgatory Pack - MiniLoop 05.ogg",
     "assets/MUSIC/17 - DavidKBD - Purgatory Pack - MiniLoop 09.ogg",
     "assets/MUSIC/21 - DavidKBD - Purgatory Pack - MiniLoop 13.ogg",
-    "assets/MUSIC/22 - DavidKBD - Purgatory Pack - MiniLoop 14.ogg"
+    "assets/MUSIC/22 - DavidKBD - Purgatory Pack - MiniLoop 14.ogg",
+    "assets/MUSIC/25 - DavidKBD - Purgatory Pack - MiniLoop 17.ogg",
+    "assets/MUSIC/26 - DavidKBD - Purgatory Pack - MiniLoop 18.ogg",
+    "assets/MUSIC/32 - DavidKBD - Purgatory Pack - MiniLoop 24.ogg",
+    "assets/MUSIC/33 - DavidKBD - Purgatory Pack - MiniLoop 25.ogg"
 ]
 
 # ========================

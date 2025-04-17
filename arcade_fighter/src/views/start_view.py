@@ -1,6 +1,7 @@
 import arcade
 import arcade.gui
 import math
+import random
 from .. import constants as C
 from .button_factory import TextButton, ButtonFactory
 from .asset_manager import AssetManager
@@ -148,13 +149,34 @@ class StartView(arcade.View):
         self.window.set_fullscreen(C.FULLSCREEN)
         self.menu_state = C.MENU_MAIN
         
-        # Start random music if not already playing
-        if not self.asset_manager.music_player or not self.asset_manager.music_player.playing:
-            self.asset_manager.play_random_music(C.MUSIC_FILES)
-            
-        # Resume music if returning to view
-        elif self.asset_manager.music_player and not self.asset_manager.music_player.playing:
-            self.asset_manager.resume_music()
+        # Music handling with debug logging
+        try:
+            if C.DEBUG_MODE:
+                print(f"Music files available: {len(C.MUSIC_FILES)}")
+                print(f"Current music player state: {self.asset_manager.music_player}")
+
+            # Start random music if not already playing
+            if not self.asset_manager.music_player or not self.asset_manager.music_player.playing:
+                if C.MUSIC_FILES:  # Check if music files list exists
+                    if C.DEBUG_MODE:
+                        print("Attempting to play random music")
+                    self.asset_manager.play_random_music(C.MUSIC_FILES)
+                    if self.asset_manager.music_player:
+                        self.asset_manager.music_player.volume = C.DEFAULT_VOLUME
+                        if C.DEBUG_MODE:
+                            print(f"Music player initialized. Volume: {self.asset_manager.music_player.volume}")
+                
+            # Resume music if returning to view
+            elif self.asset_manager.music_player and not self.asset_manager.music_player.playing:
+                if C.DEBUG_MODE:
+                    print("Resuming paused music")
+                self.asset_manager.resume_music()
+                
+        except Exception as e:
+            print(f"Error handling music: {str(e)}")
+            if C.DEBUG_MODE:
+                import traceback
+                traceback.print_exc()
 
     def setup_background(self):
         """ Setup static background image """

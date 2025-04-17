@@ -52,8 +52,7 @@ class BaseGameView(arcade.View):
             engine = arcade.PhysicsEnginePlatformer(
                 player,
                 self.platform_list,
-                gravity_constant=C.GRAVITY,
-                platforms_padding=2 # Added padding for consistency
+                gravity_constant=C.GRAVITY
             )
             self.physics_engines.append(engine)
 

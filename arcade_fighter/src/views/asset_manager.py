@@ -58,7 +58,9 @@ class AssetManager:
             print(f"Asset loading completed in {load_time:.2f}s")
             print(f"Loaded {self.total_assets_loaded} assets")
             if self.load_errors:
-                print(f"Encountered {len(self.load_errors)} errors")
+                print(f"Encountered {len(self.load_errors)} errors:")
+                for error_msg in self.load_errors:
+                    print(f"  - {error_msg}")
 
     def _load_asset(self, asset_type: str, load_func: Callable[[str], Any], cache: Dict[str, Any], *path_parts) -> Optional[Any]:
         """Generic asset loading with caching and error handling."""

@@ -364,4 +364,3 @@ class Character(arcade.Sprite):
         """Update jump buffer timer"""
         if self.jump_pressed_time < self.jump_buffer_time:
             self.jump_pressed_time += delta_time
-        super().on_update(delta_time)
