@@ -21,10 +21,7 @@ class DebugGameView(BaseGameView):
         super().setup_environment(player_count=1)
         # self.player1 is already available from BaseGameView
 
-        if C.DEBUG_MODE:
-            print("DebugGameView setup complete")
-            if self.player1:
-                print(f"Player position: ({self.player1.center_x}, {self.player1.center_y})")
+
 
         # --- Setup Key Mappings for Debug ---
         if self.player1:
@@ -142,7 +139,7 @@ class DebugGameView(BaseGameView):
                         self.window.show_view(start_view)
                     elif i == 1: # Select Character (Placeholder)
                         print("Select Character option clicked (Placeholder)")
-                        # TODO: Implement character selection view
+
                         pass
                     elif i == 2: # Toggle Debug Visualizations
                         C.DEBUG_SHOW_HITBOXES = not C.DEBUG_SHOW_HITBOXES

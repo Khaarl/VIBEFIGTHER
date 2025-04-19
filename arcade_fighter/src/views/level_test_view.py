@@ -15,9 +15,10 @@ class LevelTestView(BaseGameView):
         self.background_speeds = [] # List to hold speeds corresponding to background_layers
         self.asset_manager = AssetManager() # Initialize AssetManager
 
-    def setup(self):
-        """Set up the level generation testing environment."""
-        super().setup_environment(player_count=0) # Start with no players initially
+    def on_show_view(self):
+        """ Called once when the view is activated """
+        # Call parent setup to create environment and player
+        super().on_show_view()
 
         # Set background color
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
@@ -64,20 +65,23 @@ class LevelTestView(BaseGameView):
             platform.center_y = center_y
             self.platform_list.append(platform)
 
-        # Create a player
-        self.player1 = Character(player_num=1, character_name="Medieval King Pack 2", scale=C.CHARACTER_SCALING)
-        self.player1.center_x = C.SCREEN_WIDTH * 0.25
-        self.player1.bottom = self.platform_list[0].top + 10 # Place on the first platform
-        self.player_list.append(self.player1)
+        # The player is now created in super().on_show_view()
+        # We need to update the player's position after the platforms are created
+        if self.player1 and self.platform_list:
+             self.player1.bottom = self.platform_list[0].top + 10 # Place on the first platform
+
 
         # Setup physics engine for the player
-        self.physics_engines.append(
-            arcade.PhysicsEnginePlatformer(
-                self.player1,
-                self.platform_list,
-                gravity_constant=C.GRAVITY
-            )
-        )
+        # This is now handled in super().on_show_view()
+        # if self.player1:
+        #     self.physics_engines.append(
+        #         arcade.PhysicsEnginePlatformer(
+        #             self.player1,
+        #             self.platform_list,
+        #             gravity_constant=C.GRAVITY
+        #         )
+        #     )
+
 
         self.level_generated = True
 
@@ -94,6 +98,7 @@ class LevelTestView(BaseGameView):
             self.key_map_release[C.KEY_RIGHT_P1] = (self.player1, 'stop_moving', ())
 
 
+
     def on_draw(self):
         """Render the level testing view."""
         self.clear()
@@ -101,9 +106,8 @@ class LevelTestView(BaseGameView):
         # Draw background layers first
         self.background_layers.draw()
 
-        # Draw the generated level elements (platforms, etc.)
-        if self.platform_list:
-            self.platform_list.draw()
+        # Call parent class drawing which handles platforms and players
+        super().on_draw()
 
         # TODO: Draw other level elements as they are added
 
@@ -159,3 +163,4 @@ class LevelTestView(BaseGameView):
                 #     sprite.left = C.SCREEN_WIDTH
                 # elif sprite.left > C.SCREEN_WIDTH:
                 #     sprite.right = 0
+

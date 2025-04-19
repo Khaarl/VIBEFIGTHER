@@ -52,15 +52,14 @@ class GameView(BaseGameView):
         # Debug toggle
         if key == C.KEY_TOGGLE_DEBUG:
             C.DEBUG_MODE = not C.DEBUG_MODE
-            print(f"\nDEBUG MODE {'ENABLED' if C.DEBUG_MODE else 'DISABLED'}\n")
+
             return
             
         # Handle player controls via the base class and key map
         super().on_key_press(key, modifiers)
 
         # Keep debug logging if needed
-        if C.DEBUG_MODE:
-            print(f"Key PRESSED: {key} (modifiers: {modifiers})")
+
             
     def on_key_release(self, key, modifiers):
         """Handle key release events with debug logging"""
@@ -75,6 +74,6 @@ class GameView(BaseGameView):
         # Call base class update logic (handles physics, player animations, player logic)
         super().on_update(delta_time)
 
-        # TODO: Add game logic updates (collision checks, scoring, round end, etc.)
+
 
     # Rest of the class implementation remains unchanged...

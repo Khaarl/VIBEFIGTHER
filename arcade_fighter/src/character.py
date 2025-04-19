@@ -83,7 +83,7 @@ class Character(arcade.Sprite):
 
     def attack(self):
         """Perform attack action"""
-        # TODO: Check cooldown timer
+
         if self.state in [STATE_ATTACKING, STATE_HIT, STATE_DEAD]: # Prevent attacking while in these states
             return
 
@@ -96,7 +96,7 @@ class Character(arcade.Sprite):
         self.texture_update_timer = 0.0
         # Set initial attack texture immediately
         self.texture = self.attack_textures[0][self.facing_direction]
-        # TODO: Start attack cooldown timer
+
 
     def take_hit(self):
         """Handle taking a hit"""
@@ -106,7 +106,7 @@ class Character(arcade.Sprite):
         if not self.hit_textures: # Don't show hit anim if missing
              print(f"Warning: Player {self.player_num} cannot show hit - missing textures.")
              # Still apply damage etc.
-             # TODO: Apply damage, check for death
+
              return # Skip animation part if no textures
 
         self.state = STATE_HIT
@@ -114,7 +114,7 @@ class Character(arcade.Sprite):
         self.texture_update_timer = 0.0
         # Set initial hit texture immediately
         self.texture = self.hit_textures[0][self.facing_direction]
-        # TODO: Apply damage, check for death, maybe add brief stun/invulnerability timer
+
 
     def die(self):
         """Handle character death"""
@@ -129,7 +129,7 @@ class Character(arcade.Sprite):
             self.texture = self.death_textures[0][self.facing_direction]
         else:
              print(f"Warning: Player {self.player_num} cannot show death - missing textures.")
-        # TODO: Stop movement? Disable input? Signal game over?
+
 
     def __init__(self, player_num: int, character_name: str, scale: float = None):
         """Initialize character with optional scale and character name.
@@ -190,8 +190,7 @@ class Character(arcade.Sprite):
 
         self.state_timer = 0.0 # Generic timer, might need more specific ones (attack cooldown, hit stun)
 
-        if C.DEBUG_MODE:
-            print(f"Character {player_num} created.")
+        
 
     def update_animation(self, delta_time: float = 1/60):
         """
@@ -216,9 +215,7 @@ class Character(arcade.Sprite):
             self._update_walking_animation()
         elif self.state == STATE_JUMPING:
             self._update_jumping_animation()
-        # Assuming Fall uses the same animation as Jump for now
-        # elif self.state == STATE_FALLING:
-        #     self._update_falling_animation()
+
         elif self.state == STATE_ATTACKING:
             self._update_attacking_animation()
         elif self.state == STATE_HIT:

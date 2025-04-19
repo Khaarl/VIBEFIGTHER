@@ -179,18 +179,15 @@ MUSIC_FILES = [
 # DEBUG SETTINGS
 # ========================
 # Debug settings
-_DEBUG_MODE = os.getenv('ARCADE_DEBUG', 'False').lower() in ('true', '1', 't')
-DEBUG_SHOW_HITBOXES = False
-DEBUG_SHOW_VECTORS = False
-DEBUG_SHOW_ANIM_STATES = False
+
+
+
+
 
 def set_debug_mode(enabled: bool):
     """Toggle debug mode at runtime"""
     global _DEBUG_MODE, DEBUG_SHOW_HITBOXES, DEBUG_SHOW_VECTORS, DEBUG_SHOW_ANIM_STATES
     _DEBUG_MODE = enabled
-    DEBUG_SHOW_HITBOXES = enabled
-    DEBUG_SHOW_VECTORS = enabled
-    DEBUG_SHOW_ANIM_STATES = enabled
 
 def get_debug_mode() -> bool:
     """Get current debug mode state"""

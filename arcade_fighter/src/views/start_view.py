@@ -108,7 +108,7 @@ class StartView(arcade.View):
                 "video"
             )
         ]
-
+        
         # Audio Settings Menu
         self.audio_menu_buttons = [
             ButtonFactory.create_menu_button(
@@ -117,7 +117,7 @@ class StartView(arcade.View):
                 "audio"
             )
         ]
-
+        
         # Music Settings Menu
         self.music_menu_buttons = [
             ButtonFactory.create_menu_button(
@@ -126,8 +126,8 @@ class StartView(arcade.View):
                 "music"
             )
         ]
-
-
+        
+        
     def create_debug_button(self):
         """Create debug mode toggle button"""
         debug_button = arcade.gui.UIFlatButton(
@@ -157,9 +157,7 @@ class StartView(arcade.View):
         
         # Music handling with debug logging
         try:
-            if C.DEBUG_MODE:
-                print(f"Music files available: {len(C.MUSIC_FILES)}")
-                print(f"Current music player state: {self.asset_manager.music_player}")
+
 
             # Start random music if not already playing
             if not self.asset_manager.music_player or not self.asset_manager.music_player.playing:
@@ -305,7 +303,7 @@ class StartView(arcade.View):
                     elif btn.text == "Level Test":
                         level_test_view = LevelTestView()
                         self.window.show_view(level_test_view)
-                        level_test_view.setup() # Setup the new view
+                        # Removed redundant level_test_view.setup() call
         
         elif self.menu_state == "mode_select":
             for btn in self.mode_select_buttons:
@@ -352,7 +350,7 @@ class StartView(arcade.View):
                     self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
                     if btn.text == "Back":
                         self.menu_state = C.MENU_OPTIONS
-                    # TODO: Add logic for other audio buttons here
+
 
         elif self.menu_state == C.MENU_MUSIC:
             for btn in self.music_menu_buttons:
@@ -360,7 +358,7 @@ class StartView(arcade.View):
                     self.asset_manager._play_sound(C.SOUND_MENU_CLICK) # Play sound
                     if btn.text == "Back":
                         self.menu_state = C.MENU_OPTIONS
-                    # TODO: Add logic for other music buttons here
+
 
             for btn in self.options_menu_buttons:
                 if btn.check_mouse_press(x, y):
@@ -471,7 +469,7 @@ class StartView(arcade.View):
         self.asset_manager.stop_music() # Stop menu music before switching
 
         self.window.show_view(game_view)
-        game_view.setup()
+
 
     def on_update(self, delta_time: float):
         """ Animate background elements """

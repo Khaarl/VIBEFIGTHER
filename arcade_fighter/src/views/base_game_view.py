@@ -18,7 +18,40 @@ class BaseGameView(arcade.View):
         self.key_map_press: dict = {}
         self.key_map_release: dict = {}
 
-    def setup_environment(self, player_count=1):
+    def on_show_view(self):
+        """ Called once when the view is activated """
+        # Initialize sprite lists
+        self.player_list = arcade.SpriteList()
+        self.platform_list = arcade.SpriteList(use_spatial_hash=True)
+        self.physics_engines = [] # Reset physics engines list
+
+        # Create platform
+        platform = arcade.SpriteSolidColor(
+            C.SCREEN_WIDTH, 64, arcade.color.GRAY
+        )
+        platform.center_x = C.SCREEN_WIDTH / 2
+        platform.center_y = 32
+        self.platform_list.append(platform)
+
+        # Create players
+        # Assuming single player for now, can be extended later
+        player_count = 1 # Hardcoded for now, can be passed if needed
+        if player_count >= 1:
+            self.player1 = Character(player_num=1, character_name="Medieval King Pack 2", scale=C.CHARACTER_SCALING)
+            self.player1.center_x = C.SCREEN_WIDTH * 0.25
+            self.player1.bottom = platform.top # Place on platform
+            self.player_list.append(self.player1)
+
+
+        # Setup physics engine for player 1
+        if self.player1:
+            engine = arcade.PhysicsEnginePlatformer(
+                self.player1,
+                self.platform_list,
+                gravity_constant=C.GRAVITY
+            )
+            self.physics_engines.append(engine)
+
         """Common environment setup for all game views"""
         # Initialize sprite lists
         self.player_list = arcade.SpriteList()
