@@ -83,7 +83,8 @@ KEY_TOGGLE_ANIM_DEBUG = arcade.key.F4
 GRAVITY = 1.0
 PLAYER_MOVEMENT_SPEED = 5
 PLAYER_JUMP_SPEED = 20
-
+CAMERA_SPEED = 1.0 # Speed multiplier for parallax scrolling
+ 
 # Animation Timing (Updates per frame - lower number is faster)
 UPDATES_PER_FRAME_WALK = 5
 UPDATES_PER_FRAME_ATTACK = 3

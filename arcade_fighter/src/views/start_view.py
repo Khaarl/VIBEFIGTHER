@@ -5,6 +5,7 @@ import random
 from .. import constants as C
 from .button_factory import TextButton, ButtonFactory
 from .asset_manager import AssetManager
+from .level_test_view import LevelTestView # Import the new view
 class StartView(arcade.View):
     """ Optimized main menu view for FHD """
     
@@ -46,6 +47,11 @@ class StartView(arcade.View):
             ButtonFactory.create_menu_button(
                 C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 50,
                 "Exit",
+                "main"
+            ),
+            ButtonFactory.create_menu_button(
+                C.SCREEN_WIDTH/2, C.SCREEN_HEIGHT/2 - 100, # Adjust Y position
+                "Level Test",
                 "main"
             )
         ]
@@ -296,6 +302,10 @@ class StartView(arcade.View):
                         self.menu_state = C.MENU_OPTIONS
                     elif btn.text == "Exit":
                         arcade.exit()
+                    elif btn.text == "Level Test":
+                        level_test_view = LevelTestView()
+                        self.window.show_view(level_test_view)
+                        level_test_view.setup() # Setup the new view
         
         elif self.menu_state == "mode_select":
             for btn in self.mode_select_buttons:
