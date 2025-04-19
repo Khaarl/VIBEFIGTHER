@@ -8,6 +8,8 @@ class DebugGameView(BaseGameView):
     def __init__(self):
         super().__init__()
         self.keys_pressed = set()
+        self.menu_open = False
+        self.menu_options = ["Return to Main Menu", "Select Character (Placeholder)", "Toggle Debug Visualizations"]
         
     def setup(self):
         """Set up the testing environment"""
@@ -34,12 +36,11 @@ class DebugGameView(BaseGameView):
             self.key_map_release[arcade.key.RIGHT] = (self.player1, 'stop_moving', ())
         
     def on_draw(self):
-        """Render the screen"""
-        self.clear()
-        self.platform_list.draw()
-        self.player_list.draw()
+        """Render the screen with debug visualizations."""
+        # Call the base class's on_draw for common drawing
+        super().on_draw()
         
-        # Debug visualizations
+        # Debug visualizations (controlled by flags in constants.py)
         if C.DEBUG_SHOW_HITBOXES:
             for sprite in self.player_list:
                 arcade.draw_polygon_outline(sprite.hit_box.get_adjusted_points(),
@@ -52,14 +53,14 @@ class DebugGameView(BaseGameView):
             for sprite in self.player_list:
                 # Draw velocity vector
                 arcade.draw_line(sprite.center_x, sprite.center_y,
-                               sprite.center_x + sprite.change_x * 5,
-                               sprite.center_y + sprite.change_y * 5,
-                               arcade.color.GREEN, 2)
+                                sprite.center_x + sprite.change_x * 5,
+                                sprite.center_y + sprite.change_y * 5,
+                                arcade.color.GREEN, 2)
                 # Draw facing direction indicator
                 arcade.draw_line(sprite.center_x, sprite.center_y,
-                               sprite.center_x + sprite.facing_direction * 30,
-                               sprite.center_y,
-                               arcade.color.YELLOW, 2)
+                                sprite.center_x + sprite.facing_direction * 30,
+                                sprite.center_y,
+                                arcade.color.YELLOW, 2)
         
     def on_key_press(self, key, modifiers):
         """Handle key presses for animation testing"""

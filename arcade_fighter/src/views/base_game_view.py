@@ -35,7 +35,7 @@ class BaseGameView(arcade.View):
 
         # Create players
         if player_count >= 1:
-            self.player1 = Character(player_num=1, scale=C.CHARACTER_SCALING)
+            self.player1 = Character(player_num=1, character_name="Medieval King Pack 2", scale=C.CHARACTER_SCALING)
             self.player1.center_x = C.SCREEN_WIDTH * 0.25
             self.player1.bottom = platform.top # Place on platform
             self.player_list.append(self.player1)
@@ -97,3 +97,11 @@ class BaseGameView(arcade.View):
                     print(f"Error calling method {method_name} with args {args}: {e}")
             elif C.DEBUG_MODE:
                 print(f"Warning: Player not found or method '{method_name}' not in {player} for key {key}")
+
+    def on_draw(self):
+        """Common drawing logic for game views."""
+        self.clear()
+        if self.platform_list:
+            self.platform_list.draw()
+        if self.player_list:
+            self.player_list.draw()

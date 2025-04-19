@@ -43,10 +43,9 @@ from .constants import (
 
 class Character(arcade.Sprite):
     """ Base Character class for players """
-    def reload_textures(self):
-        """Reload all character textures"""
-        # TODO: Make base_path dynamic based on selected character
-        base_path = "arcade_fighter/assets/CHAR-ANIM/PLAYERS/EVil Wizard 2/Sprites/"
+    def reload_textures(self, character_name: str):
+        """Reload all character textures based on character name"""
+        base_path = f"arcade_fighter/assets/CHAR-ANIM/PLAYERS/{character_name}/Sprites/"
 
         # Load all textures, handling potential loading failures
         self.idle_texture_pair = load_texture_pair(f"{base_path}Idle.png")
@@ -132,8 +131,8 @@ class Character(arcade.Sprite):
              print(f"Warning: Player {self.player_num} cannot show death - missing textures.")
         # TODO: Stop movement? Disable input? Signal game over?
 
-    def __init__(self, player_num: int, scale: float = None):
-        """Initialize character with optional scale.
+    def __init__(self, player_num: int, character_name: str, scale: float = None):
+        """Initialize character with optional scale and character name.
         If scale is None, will calculate based on resolution."""
         if scale is None:
             # Use predefined scaling based on resolution
@@ -150,6 +149,7 @@ class Character(arcade.Sprite):
 
         # --- Player Identity ---
         self.player_num = player_num
+        self.character_name = character_name
 
         # --- State and Animation ---
         self.state = STATE_IDLE
@@ -159,7 +159,7 @@ class Character(arcade.Sprite):
         self.texture_update_timer = 0.0 # Timer to control animation speed
 
         # Load textures
-        self.reload_textures() # This sets self.texture
+        self.reload_textures(self.character_name) # This sets self.texture
 
         # Set hit box (adjust as needed)
         # Ensure texture is loaded before accessing hit_box_points
@@ -195,131 +195,215 @@ class Character(arcade.Sprite):
 
     def update_animation(self, delta_time: float = 1/60):
         """
-        Logic for selecting the proper texture to use, handling state transitions,
-        cycling through animation frames, and flipping textures based on direction.
+        State machine for handling character animations.
+        Selects the proper texture to use, cycles through animation frames,
+        and flips textures based on direction.
         """
-        # --- Determine Facing Direction ---
-        # Only change facing direction if not in a state that should lock direction
+        # Determine Facing Direction (can change in most states)
         if self.state not in [STATE_ATTACKING, STATE_HIT, STATE_DEAD]:
             if self.change_x < 0:
                 self.facing_direction = LEFT_FACING
             elif self.change_x > 0:
                 self.facing_direction = RIGHT_FACING
 
-        # --- Determine Physics-Based State (potential state if not in action) ---
-        current_physics_state = STATE_IDLE # Default
-        if not self.is_on_ground:
-            # Use a small tolerance for vertical velocity check near ground
-            if self.change_y > 0.1:
-                 current_physics_state = STATE_JUMPING
-            else:
-                 current_physics_state = STATE_JUMPING
-        elif abs(self.change_x) > 0.1: # Use a small tolerance for horizontal movement
-            current_physics_state = STATE_WALKING
-
-        # --- State Transition Logic ---
-        state_changed = False
-        # Only transition TO physics state if not currently in a blocking action state
-        if self.state not in [STATE_ATTACKING, STATE_HIT, STATE_DEAD]:
-            if self.state != current_physics_state:
-                self.previous_state = self.state
-                self.state = current_physics_state
-                state_changed = True
-        # Note: Transitions INTO action states (attack, hit, dead) are handled by other methods
-
-        # Reset animation index if state changed
-        if state_changed:
-            self.cur_texture_index = 0
-            self.texture_update_timer = 0.0
-
-        # --- Animation Frame Update ---
+        # Update animation timer
         self.texture_update_timer += delta_time
 
-        # Select texture list and update speed based on state
-        texture_list = None
-        updates_per_frame = 5 # Default speed
-
-        # Assign texture list based on current state, check if list exists
+        # Call state-specific animation update
         if self.state == STATE_IDLE:
-            if self.idle_texture_pair[0]: self.texture = self.idle_texture_pair[self.facing_direction]
-            return # Idle has no frame sequence
+            self._update_idle_animation()
         elif self.state == STATE_WALKING:
-            if self.walk_textures: texture_list = self.walk_textures
-            updates_per_frame = UPDATES_PER_FRAME_WALK
+            self._update_walking_animation()
         elif self.state == STATE_JUMPING:
-            if self.jump_texture_pair[0]: self.texture = self.jump_texture_pair[self.facing_direction]
-            return # Jump has no frame sequence (usually)
-            return # Fall has no frame sequence (usually)
+            self._update_jumping_animation()
+        # Assuming Fall uses the same animation as Jump for now
+        # elif self.state == STATE_FALLING:
+        #     self._update_falling_animation()
         elif self.state == STATE_ATTACKING:
-            if self.attack_textures: texture_list = self.attack_textures
-            updates_per_frame = UPDATES_PER_FRAME_ATTACK
+            self._update_attacking_animation()
         elif self.state == STATE_HIT:
-            if self.hit_textures: texture_list = self.hit_textures
-            updates_per_frame = UPDATES_PER_FRAME_HIT
+            self._update_hit_animation()
         elif self.state == STATE_DEAD:
-            if self.death_textures: texture_list = self.death_textures
-            updates_per_frame = UPDATES_PER_FRAME_DEATH
-            # Keep showing last frame of death animation if already there and textures exist
-            if texture_list and self.cur_texture_index >= len(texture_list) - 1:
-                 self.texture = texture_list[-1][self.facing_direction]
-                 return
+            self._update_death_animation()
 
-        # --- Cycle Through Animation Frames ---
-        if not texture_list: # If no textures for current state, fallback to idle
-             if self.idle_texture_pair[0]: self.texture = self.idle_texture_pair[self.facing_direction]
-             # Log warning if state should have had textures but didn't
-             if self.state not in [STATE_IDLE, STATE_JUMPING]:
-                 print(f"Warning: Missing textures for state {self.state}")
-             return
+        # Handle transitions from action states back to physics states
+        # This is done within the state update methods when an animation cycle completes.
 
-        # Check if it's time to advance the frame
-        frame_duration = updates_per_frame / 60.0
+
+    def _update_idle_animation(self):
+        """Update animation for the idle state."""
+        if self.idle_texture_pair and self.idle_texture_pair[0]:
+            self.texture = self.idle_texture_pair[self.facing_direction]
+        # Transition to walking or jumping based on physics state
+        if abs(self.change_x) > 0.1:
+            self.state = STATE_WALKING
+            self.cur_texture_index = 0
+            self.texture_update_timer = 0.0
+        elif not self.is_on_ground:
+             self.state = STATE_JUMPING # Or STATE_FALLING if implemented separately
+             self.cur_texture_index = 0
+             self.texture_update_timer = 0.0
+
+
+    def _update_walking_animation(self):
+        """Update animation for the walking state."""
+        if not self.walk_textures:
+            # Fallback to idle if no walk textures
+            self.state = STATE_IDLE
+            self.cur_texture_index = 0
+            self.texture_update_timer = 0.0
+            return
+
+        # Cycle through walk animation frames
+        frame_duration = C.UPDATES_PER_FRAME_WALK / 60.0
         if self.texture_update_timer >= frame_duration:
-            self.texture_update_timer -= frame_duration # Subtract frame duration, don't just reset
+            self.texture_update_timer -= frame_duration
             self.cur_texture_index += 1
+            if self.cur_texture_index >= len(self.walk_textures):
+                self.cur_texture_index = 0 # Loop walking animation
 
-            # Check if animation cycle finished
-            if self.cur_texture_index >= len(texture_list):
-                # Loop walking animation
-                if self.state == STATE_WALKING:
-                    self.cur_texture_index = 0
-                # End attack/hit animation and return to appropriate physics state
-                elif self.state in [STATE_ATTACKING, STATE_HIT]:
-                    # Determine state to return to *after* action completes
-                    if not self.is_on_ground:
-                        next_state = STATE_JUMPING # Simplified: Use JUMPING for all airborne states
-                    elif abs(self.change_x) > 0.1:
-                        next_state = STATE_WALKING
-                    else:
-                        next_state = STATE_IDLE
-                    self.state = next_state
-                    self.cur_texture_index = 0 # Reset index for the new state's animation
-                    # Update texture immediately based on new state
-                    self.update_animation(0) # Call again immediately to set correct texture for new state
-                    return # Exit after state change
-                # Keep showing last frame for death
-                elif self.state == STATE_DEAD:
-                    self.cur_texture_index = len(texture_list) - 1
-                else: # Default loop for any other multi-frame animations
-                     self.cur_texture_index = 0
+        self.texture = self.walk_textures[self.cur_texture_index][self.facing_direction]
 
-            # Set the texture for the current frame (or clamped index for death)
-            frame_index = min(self.cur_texture_index, len(texture_list) - 1)
-            if frame_index < len(texture_list): # Ensure index is valid
-                self.texture = texture_list[frame_index][self.facing_direction]
+        # Transition to idle or jumping based on physics state
+        if abs(self.change_x) < 0.1 and self.is_on_ground:
+            self.state = STATE_IDLE
+            self.cur_texture_index = 0
+            self.texture_update_timer = 0.0
+        elif not self.is_on_ground:
+             self.state = STATE_JUMPING # Or STATE_FALLING
+             self.cur_texture_index = 0
+             self.texture_update_timer = 0.0
+
+
+    def _update_jumping_animation(self):
+        """Update animation for the jumping state."""
+        if self.jump_texture_pair and self.jump_texture_pair[0]:
+            self.texture = self.jump_texture_pair[self.facing_direction]
+        # Transition to falling or idle based on physics state
+        if self.is_on_ground:
+            if abs(self.change_x) > 0.1:
+                self.state = STATE_WALKING
+            else:
+                self.state = STATE_IDLE
+            self.cur_texture_index = 0
+            self.texture_update_timer = 0.0
+        # Note: A separate falling state and animation could be added here
+
+
+    # def _update_falling_animation(self):
+    #     """Update animation for the falling state."""
+    #     # Similar logic to jumping, but with fall texture
+    #     if self.fall_texture_pair and self.fall_texture_pair[0]:
+    #         self.texture = self.fall_texture_pair[self.facing_direction]
+    #     # Transition to idle or walking when grounded
+    #     if self.is_on_ground:
+    #         if abs(self.change_x) > 0.1:
+    #             self.state = STATE_WALKING
+    #         else:
+    #             self.state = STATE_IDLE
+    #         self.cur_texture_index = 0
+    #         self.texture_update_timer = 0.0
+
+
+    def _update_attacking_animation(self):
+        """Update animation for the attacking state."""
+        if not self.attack_textures:
+            # Fallback to idle if no attack textures
+            self.state = STATE_IDLE
+            self.cur_texture_index = 0
+            self.texture_update_timer = 0.0
+            return
+
+        # Cycle through attack animation frames
+        frame_duration = C.UPDATES_PER_FRAME_ATTACK / 60.0
+        if self.texture_update_timer >= frame_duration:
+            self.texture_update_timer -= frame_duration
+            self.cur_texture_index += 1
+            if self.cur_texture_index >= len(self.attack_textures):
+                # Attack animation finished, transition back to physics state
+                if not self.is_on_ground:
+                    next_state = STATE_JUMPING # Simplified
+                elif abs(self.change_x) > 0.1:
+                    next_state = STATE_WALKING
+                else:
+                    next_state = STATE_IDLE
+                self.state = next_state
+                self.cur_texture_index = 0
+                self.texture_update_timer = 0.0
+                # Call update_animation immediately to set the correct texture for the new state
+                self.update_animation(0)
+                return # Exit after state change
+
+        # Set the current attack frame texture
+        frame_index = min(self.cur_texture_index, len(self.attack_textures) - 1)
+        if frame_index < len(self.attack_textures):
+            self.texture = self.attack_textures[frame_index][self.facing_direction]
+
+
+    def _update_hit_animation(self):
+        """Update animation for the hit state."""
+        if not self.hit_textures:
+            # Fallback to idle if no hit textures
+            self.state = STATE_IDLE
+            self.cur_texture_index = 0
+            self.texture_update_timer = 0.0
+            return
+
+        # Cycle through hit animation frames
+        frame_duration = C.UPDATES_PER_FRAME_HIT / 60.0
+        if self.texture_update_timer >= frame_duration:
+            self.texture_update_timer -= frame_duration
+            self.cur_texture_index += 1
+            if self.cur_texture_index >= len(self.hit_textures):
+                # Hit animation finished, transition back to physics state
+                if not self.is_on_ground:
+                    next_state = STATE_JUMPING # Simplified
+                elif abs(self.change_x) > 0.1:
+                    next_state = STATE_WALKING
+                else:
+                    next_state = STATE_IDLE
+                self.state = next_state
+                self.cur_texture_index = 0
+                self.texture_update_timer = 0.0
+                # Call update_animation immediately to set the correct texture for the new state
+                self.update_animation(0)
+                return # Exit after state change
+
+        # Set the current hit frame texture
+        frame_index = min(self.cur_texture_index, len(self.hit_textures) - 1)
+        if frame_index < len(self.hit_textures):
+            self.texture = self.hit_textures[frame_index][self.facing_direction]
+
+
+    def _update_death_animation(self):
+        """Update animation for the death state."""
+        if not self.death_textures:
+            # Stay in death state but no animation if no textures
+            return
+
+        # Cycle through death animation frames
+        frame_duration = C.UPDATES_PER_FRAME_DEATH / 60.0
+        if self.texture_update_timer >= frame_duration:
+            self.texture_update_timer -= frame_duration
+            self.cur_texture_index += 1
+            # Keep showing the last frame
+            if self.cur_texture_index >= len(self.death_textures):
+                self.cur_texture_index = len(self.death_textures) - 1
+
+        # Set the current death frame texture
+        frame_index = min(self.cur_texture_index, len(self.death_textures) - 1)
+        if frame_index < len(self.death_textures):
+            self.texture = self.death_textures[frame_index][self.facing_direction]
 
 
     def on_update(self, delta_time: float = 1/60):
-        # Update any timers (example: attack cooldown, hit stun)
-        # This method might need more specific logic based on game needs
-        if self.state_timer > 0:
-            self.state_timer -= delta_time
-            if self.state_timer <= 0:
-                self.state_timer = 0
-                # Example: End hit stun
-                # if self.state == STATE_HIT:
-                #     # Transition back to physics state handled by update_animation ending the cycle
-                #     pass
+        """Update jump buffer timer and animation."""
+        # Update jump buffer timer
+        if self.jump_pressed_time < self.jump_buffer_time:
+            self.jump_pressed_time += delta_time
+
+        # Update animation using the state machine
+        self.update_animation(delta_time)
 
 
     def move(self, direction: int):
@@ -359,8 +443,3 @@ class Character(arcade.Sprite):
                  print(f"Player {self.player_num} JUMP ATTEMPTED BUT NOT GROUNDED")
             else:
                  print(f"Player {self.player_num} JUMP ATTEMPTED BUT IN STATE {self.state}")
-
-    def on_update(self, delta_time: float = 1/60):
-        """Update jump buffer timer"""
-        if self.jump_pressed_time < self.jump_buffer_time:
-            self.jump_pressed_time += delta_time
