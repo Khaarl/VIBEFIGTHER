@@ -23,7 +23,8 @@ class AssetManager:
         
         # Audio
         self._sound_cache = {}  # path: sound
-        self.music_player = None
+        self.current_music_sound: Optional[arcade.Sound] = None # Store the arcade.Sound object
+        self.music_player = None # The pyglet.media.Player instance
         self.current_track = None
         self.current_volume = C.DEFAULT_VOLUME
         self.sound_effects = {}
@@ -179,8 +180,10 @@ class AssetManager:
         """Play a music track"""
         sound = self._load_sound(music_path)
         if sound:
+            self.current_music_sound = sound # Store the sound object
             self.music_player = sound.play(volume=self.current_volume)
-            self.music_player.loop = True
+            if self.music_player: # Check if play returned a player
+                self.music_player.loop = True
             return self.music_player
         return None
 
@@ -204,6 +207,15 @@ class AssetManager:
 
     def stop_music(self) -> None:
         """Stop music playback completely"""
+        # Stop the music player if it exists and is playing
         if self.music_player:
-            self.music_player.stop()
-            self.music_player = None
+            print(f"DEBUG: Type of music_player: {type(self.music_player)}")
+            print(f"DEBUG: Attributes of music_player: {dir(self.music_player)}")
+            if hasattr(self.music_player, 'stop'):
+                 print("DEBUG: music_player has 'stop' attribute.")
+                 if self.music_player.playing:
+                     self.music_player.stop()
+            else:
+                 print("DEBUG: music_player DOES NOT have 'stop' attribute.")
+        self.current_music_sound = None
+        self.music_player = None

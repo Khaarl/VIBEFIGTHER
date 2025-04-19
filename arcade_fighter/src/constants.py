@@ -68,13 +68,6 @@ KEY_RIGHT_P1 = arcade.key.D
 KEY_JUMP_P1 = arcade.key.SPACE
 KEY_ATTACK_P1 = arcade.key.F
 
-# Player 2
-KEY_UP_P2 = arcade.key.UP
-KEY_DOWN_P2 = arcade.key.DOWN
-KEY_LEFT_P2 = arcade.key.LEFT
-KEY_RIGHT_P2 = arcade.key.RIGHT
-KEY_JUMP_P2 = arcade.key.ENTER
-KEY_ATTACK_P2 = arcade.key.RCTRL
 
 # Debug controls
 KEY_TOGGLE_DEBUG = arcade.key.F1
@@ -129,7 +122,6 @@ HEALTHBAR_WIDTH = 200
 HEALTHBAR_HEIGHT = 20
 HEALTHBAR_OFFSET_Y = 30
 HEALTHBAR_PLAYER1_X = 50
-HEALTHBAR_PLAYER2_X = SCREEN_WIDTH - 50 - HEALTHBAR_WIDTH
 HEALTHBAR_COLOR = arcade.color.RED
 HEALTHBAR_BG_COLOR = arcade.color.DARK_GRAY
 
@@ -217,4 +209,3 @@ def set_resolution(res_key: str):
         _CURRENT_RESOLUTION = res_key
         SCREEN_WIDTH, SCREEN_HEIGHT = RESOLUTIONS[res_key]
         # Update resolution-dependent UI positions
-        HEALTHBAR_PLAYER2_X = SCREEN_WIDTH - 50 - HEALTHBAR_WIDTH

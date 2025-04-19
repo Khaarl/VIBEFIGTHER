@@ -13,7 +13,6 @@ class BaseGameView(arcade.View):
         self.physics_engines: list[arcade.PhysicsEnginePlatformer] = []
         # Player references (populated in setup_environment)
         self.player1: Character | None = None
-        self.player2: Character | None = None
         # Key mapping dictionaries (populated by child views)
         # Format: {key: (player_instance, method_name, *args)}
         self.key_map_press: dict = {}
@@ -41,16 +40,11 @@ class BaseGameView(arcade.View):
             self.player1.bottom = platform.top # Place on platform
             self.player_list.append(self.player1)
 
-        if player_count >= 2:
-            self.player2 = Character(player_num=2, scale=C.CHARACTER_SCALING)
-            self.player2.center_x = C.SCREEN_WIDTH * 0.75
-            self.player2.bottom = platform.top # Place on platform
-            self.player_list.append(self.player2)
 
-        # Setup physics engines for all created players
-        for player in self.player_list:
+        # Setup physics engine for player 1
+        if self.player1:
             engine = arcade.PhysicsEnginePlatformer(
-                player,
+                self.player1,
                 self.platform_list,
                 gravity_constant=C.GRAVITY
             )

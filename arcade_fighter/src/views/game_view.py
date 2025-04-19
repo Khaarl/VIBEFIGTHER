@@ -11,7 +11,6 @@ class GameView(BaseGameView):
         """Initializer"""
         super().__init__()
         self.player1_text = None
-        self.player2_text = None
         self.round_text = None
         self.placeholder_text = None
         self.debug_texts = []
@@ -19,7 +18,7 @@ class GameView(BaseGameView):
     def setup(self):
         """Set up the game with initial state"""
         # Setup common environment
-        super().setup_environment(player_count=2)
+        super().setup_environment(player_count=1)
         
         # Set background color
         arcade.set_background_color(C.BACKGROUND_COLOR)
@@ -27,7 +26,6 @@ class GameView(BaseGameView):
         # Initialize game state
         self.round_number = 1
         self.player1_rounds_won = 0
-        self.player2_rounds_won = 0
 
         # Physics engines are now set up in BaseGameView.setup_environment
 
@@ -47,16 +45,6 @@ class GameView(BaseGameView):
             self.key_map_release[C.KEY_LEFT_P1] = (self.player1, 'stop_moving', ())
             self.key_map_release[C.KEY_RIGHT_P1] = (self.player1, 'stop_moving', ())
 
-        if self.player2:
-            self.key_map_press[C.KEY_LEFT_P2] = (self.player2, 'move', (-1,))
-            self.key_map_press[C.KEY_RIGHT_P2] = (self.player2, 'move', (1,))
-            self.key_map_press[C.KEY_JUMP_P2] = (self.player2, 'jump', ())
-            # Add attack key if defined
-            if hasattr(C, 'KEY_ATTACK_P2'):
-                 self.key_map_press[C.KEY_ATTACK_P2] = (self.player2, 'attack', ())
-
-            self.key_map_release[C.KEY_LEFT_P2] = (self.player2, 'stop_moving', ())
-            self.key_map_release[C.KEY_RIGHT_P2] = (self.player2, 'stop_moving', ())
 
 
     def on_key_press(self, key, modifiers):
