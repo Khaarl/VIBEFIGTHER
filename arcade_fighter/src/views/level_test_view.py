@@ -10,7 +10,6 @@ class LevelTestView(BaseGameView):
 
     def __init__(self):
         super().__init__()
-        super().__init__()
         self.level_generated = False # Flag to ensure level is generated only once
         self.background_layers = arcade.SpriteList() # Use SpriteList for background layers
         self.background_speeds = [] # List to hold speeds corresponding to background_layers
@@ -105,9 +104,7 @@ class LevelTestView(BaseGameView):
         # Draw the generated level elements (platforms, etc.)
         if self.platform_list:
             self.platform_list.draw()
-        # Draw the player
-        if self.player_list:
-            self.player_list.draw()
+
         # TODO: Draw other level elements as they are added
 
     def on_key_press(self, key, modifiers):
