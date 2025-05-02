@@ -7,19 +7,26 @@ To add a new option to the main menu of the Arcade Fighter game that allows for 
 - The core game views (`GameView`, `BaseGameView`, `DebugGameView`) currently handle basic environment setup but do not contain complex level generation logic.
 - `BaseGameView` provides a minimal environment with a single platform.
 - `StartView` manages the main menu and transitions between different game views, including a "Debug Mode" that leads to `DebugGameView`.
+- **`LevelTestView` (`arcade_fighter/src/views/level_test_view.py`)**:
+    - Inherits from `BaseGameView`.
+    - Initializes and uses `AssetManager` for loading assets.
+    - Currently implements a *basic* level generation with solid color platforms for testing purposes.
+    - Loads background layers for parallax scrolling using assets from `assets/LEVELS/Glacial-mountains/Layers/`. Includes a check and warning if a background texture fails to load.
+    - Sets up basic player controls and physics.
+    - Handles returning to the main menu via the Escape key.
 
 ## Proposed Plan
 
 1.  **Create a new view for Level Generation Testing:**
-    *   Create a new Python file: `arcade_fighter/src/views/level_test_view.py`.
-    *   This view will inherit from `BaseGameView`.
-    *   It will be specifically designed to handle and display generated levels.
+    *   Create a new Python file: `arcade_fighter/src/views/level_test_view.py`. (Already created)
+    *   This view will inherit from `BaseGameView`. (Already done)
+    *   It will be specifically designed to handle and display generated levels. (Basic implementation exists)
 
 2.  **Implement Level Generation Logic:**
-    *   Add the code responsible for generating levels within `level_test_view.py`.
+    *   Add the code responsible for generating levels within `level_test_view.py`. (Basic implementation exists, needs expansion)
     *   Consider creating a separate module or class for complex generation algorithms if necessary.
-    *   Utilize existing assets from `arcade_fighter/assets/LEVELS/`.
-    *   Include parameters or controls within this view to influence the generation process for testing different scenarios.
+    *   Utilize existing assets from `arcade_fighter/assets/LEVELS/`. (Used for backgrounds, needs to be used for level tiles/elements)
+    *   Include parameters or controls within this view to influence the generation process for testing different scenarios. (Needs implementation)
 
 3.  **Add a "Level Test" button to the Main Menu:**
     *   Modify `arcade_fighter/src/views/start_view.py`.
@@ -30,7 +37,7 @@ To add a new option to the main menu of the Arcade Fighter game that allows for 
     *   Configure the new "Level Test" button to switch the current view to the new `LevelTestView` when clicked.
 
 5.  **Initial Level Setup in LevelTestView:**
-    *   Implement the `setup` method of `LevelTest_View`.
+    *   Implement the `setup` method of `LevelTest_View`. (Setup logic is in `on_show_view` currently)
     *   Call the level generation logic within this method to create and display the initial generated level.
 
 ## View Flow Diagram
@@ -46,6 +53,7 @@ graph TD
     G --> A;
     D --> A;
     E --> A;
+
 ## LevelTestView Fixes (2025-04-19)
 
 ### Issues Identified
@@ -67,3 +75,13 @@ graph TD
   - Fix visual artifacts from double-drawing
   - Maintain all existing functionality
   - Improve code maintainability
+
+## Current Status of LevelTestView (2025-04-19)
+
+- The `LevelTestView` is implemented and inherits from `BaseGameView`.
+- It uses the `AssetManager` to load background assets from the `Glacial-mountains` set.
+- Basic parallax scrolling is implemented for the background.
+- A simple test level with solid color platforms is generated.
+- Player character is added and basic controls are functional.
+- Error handling for background asset loading is included (prints a warning if a texture fails to load).
+- **Note:** Visual verification by running the application is required to confirm that the `Glacial-mountains` assets are loading and displaying correctly. Further development is needed to implement more complex level generation using level assets.

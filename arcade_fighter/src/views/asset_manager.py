@@ -69,7 +69,8 @@ class AssetManager:
         asset_name_for_error = f"{asset_type} {path}" # For error messages
 
         if not os.path.exists(path):
-            self.load_errors.append(f"{asset_type} not found: {path}")
+            if C.DEBUG_MODE:
+                self.load_errors.append(f"{asset_type} not found: {path}")
             return None
 
         if path in cache:
@@ -91,6 +92,10 @@ class AssetManager:
     def _load_texture(self, *path_parts) -> Optional[arcade.Texture]:
         """Load texture using generic asset loader"""
         return self._load_asset("Texture", arcade.load_texture, self._texture_cache, *path_parts)
+
+    def load_texture(self, *path_parts) -> Optional[arcade.Texture]:
+        """Load a single texture by path using the asset manager."""
+        return self._load_texture(*path_parts)
 
     def _load_sound(self, *path_parts) -> Optional[arcade.Sound]:
         """Load sound using generic asset loader"""
@@ -126,7 +131,7 @@ class AssetManager:
             'jump': self._find_character_frames(char_name, ['Jump.png', 'jump.png']),
             'fall': self._find_character_frames(char_name, ['Fall.png', 'fall.png']),
             'attack': self._find_attack_frames(char_name),
-            'hit': self._find_character_frames(char_name, ['Take hit.png', 'Take Hit.png', 'hit.png', 'Hit.png']),
+            'hit': self._find_character_frames(char_name, ['Take hit.png', 'Take Hit.png', 'hit.png', 'Hit.png', 'Get Hit.png']),
             'death': self._find_character_frames(char_name, ['Death.png', 'death.png'])
         }
         

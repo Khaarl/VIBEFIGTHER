@@ -23,6 +23,8 @@ class LevelTestView(BaseGameView):
         # Set background color
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
 
+        # Load and set up background layers for parallax scrolling
+
         # --- Load and Setup Background Layers (Parallax) ---
         background_layer_info = [
             ("assets/LEVELS/Glacial-mountains/Layers/sky.png", 0.1),
@@ -34,7 +36,7 @@ class LevelTestView(BaseGameView):
         ]
 
         for path, speed in background_layer_info:
-            texture = self.asset_manager._load_texture(path)
+            texture = self.asset_manager.load_texture(path)
             if texture: # Only create sprite if texture loaded successfully
                 sprite = arcade.Sprite(texture)
                 sprite.center_x = C.SCREEN_WIDTH / 2
@@ -46,8 +48,26 @@ class LevelTestView(BaseGameView):
             else:
                 print(f"Warning: Could not load background texture: {path}")
 
+        self.setup_level()
 
-        # --- Basic Level Generation for Testing ---
+
+
+
+        # --- Setup Key Mappings for Player ---
+        if self.player1:
+            self.key_map_press[C.KEY_LEFT_P1] = (self.player1, 'move', (-1,))
+            self.key_map_press[C.KEY_RIGHT_P1] = (self.player1, 'move', (1,))
+            self.key_map_press[C.KEY_JUMP_P1] = (self.player1, 'jump', ())
+            # Add attack key if defined in constants
+            if hasattr(C, 'KEY_ATTACK_P1'):
+                 self.key_map_press[C.KEY_ATTACK_P1] = (self.player1, 'attack', ())
+
+            self.key_map_release[C.KEY_LEFT_P1] = (self.player1, 'stop_moving', ())
+            self.key_map_release[C.KEY_RIGHT_P1] = (self.player1, 'stop_moving', ())
+
+
+    def setup_level(self):
+        """Sets up the basic test level and player position."""
         print("LevelTestView setup: Generating a basic test level.")
 
         # Define a simple level structure (x, y, width, height)
@@ -70,32 +90,7 @@ class LevelTestView(BaseGameView):
         if self.player1 and self.platform_list:
              self.player1.bottom = self.platform_list[0].top + 10 # Place on the first platform
 
-
-        # Setup physics engine for the player
-        # This is now handled in super().on_show_view()
-        # if self.player1:
-        #     self.physics_engines.append(
-        #         arcade.PhysicsEnginePlatformer(
-        #             self.player1,
-        #             self.platform_list,
-        #             gravity_constant=C.GRAVITY
-        #         )
-        #     )
-
-
         self.level_generated = True
-
-        # --- Setup Key Mappings for Player ---
-        if self.player1:
-            self.key_map_press[C.KEY_LEFT_P1] = (self.player1, 'move', (-1,))
-            self.key_map_press[C.KEY_RIGHT_P1] = (self.player1, 'move', (1,))
-            self.key_map_press[C.KEY_JUMP_P1] = (self.player1, 'jump', ())
-            # Add attack key if defined in constants
-            if hasattr(C, 'KEY_ATTACK_P1'):
-                 self.key_map_press[C.KEY_ATTACK_P1] = (self.player1, 'attack', ())
-
-            self.key_map_release[C.KEY_LEFT_P1] = (self.player1, 'stop_moving', ())
-            self.key_map_release[C.KEY_RIGHT_P1] = (self.player1, 'stop_moving', ())
 
 
 
@@ -159,8 +154,12 @@ class LevelTestView(BaseGameView):
 
                 # Optional: Wrap background if it goes off-screen
                 # This requires careful calculation based on sprite width and screen width
-                # if sprite.right < 0:
-                #     sprite.left = C.SCREEN_WIDTH
-                # elif sprite.left > C.SCREEN_WIDTH:
-                #     sprite.right = 0
+                if sprite.right < 0:
+                    sprite.left = C.SCREEN_WIDTH
+                elif sprite.left > C.SCREEN_WIDTH:
+                    sprite.right = 0
 
+
+        # Implement parallax scrolling for background layers
+
+                # Wrap background if it goes off-screen to create a continuous effect

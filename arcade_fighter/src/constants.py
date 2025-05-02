@@ -179,6 +179,12 @@ MUSIC_FILES = [
 # DEBUG SETTINGS
 # ========================
 # Debug settings
+_DEBUG_MODE = False
+
+
+DEBUG_SHOW_HITBOXES = False
+DEBUG_SHOW_VECTORS = False
+DEBUG_SHOW_ANIM_STATES = False
 
 
 
